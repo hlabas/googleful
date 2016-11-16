@@ -1,0 +1,19 @@
+<html>
+<head>
+  <title>Authorization of Contentful</title>
+</head>
+<body>
+  <div id="msg">Authorization is in progress</div>
+</body>
+<script>window.onload = sendToken;
+  function sendToken() {
+    google.script.url.getLocation(function(loc) {
+      google.script.run.withSuccessHandler(function () {
+        document.querySelector('#msg').textContent = 'Authorization was successful, you may now close this window.';
+      }).setToken(
+      loc.hash.split('&')[0].split('=')[1]
+    );
+  });
+};
+</script>
+</html>

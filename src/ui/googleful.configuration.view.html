@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <link rel="stylesheet"
+        href="https://ssl.gstatic.com/docs/script/css/add-ons1.css" />
+    <style>
+      <?!= include('googleful.styles.css'); ?>
+    </style>
+  </head>
+
+  <body>
+    <div class="sample-container">
+      <input value="<?!= data.token ?>" id="token" type="text">
+      <button class="action" id="save" onclick="save();">Save</button>
+    </div>
+  </body>
+  <script>
+    var mode = '<?!= mode ?>';
+    <?!= include('googleful.configuration.controller.client.js'); ?>
+    <?!= include('lib.client.js'); ?>
+  </script>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</html>

@@ -1,0 +1,19 @@
+<html>
+  <head>
+  <link rel=stylesheet
+      href=https://ssl.gstatic.com/docs/script/css/add-ons1.css />
+  <style>
+    <?!= include('googleful.styles.css'); ?>
+    </style>
+  </head>
+  <body>
+    <div class=sample-container>
+      <button class=action id=runServer onclick=onGetContentTypesClick();>Get content types</button>
+    </div>
+  </body>
+  <script>
+    var mode = '<?!= mode ?>';
+    <?!= include('googleful.home.controller.client.js'); ?>
+    <?!= include('lib.client.js'); ?>
+  </script>
+</html>
