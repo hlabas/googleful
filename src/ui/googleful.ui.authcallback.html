@@ -10,8 +10,9 @@
     google.script.url.getLocation(function(loc) {
       google.script.run.withSuccessHandler(function () {
         document.querySelector('#msg').textContent = 'Authorization was successful, you may now close this window.';
-      }).setToken(
-      loc.hash.split('&')[0].split('=')[1]
+      }).call(
+      'Configuration', 'setToken',
+      [loc.hash.split('&')[0].split('=')[1]]
     );
   });
 };

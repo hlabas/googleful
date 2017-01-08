@@ -101,6 +101,12 @@ function copyEnvironmentSpecific() {
       .pipe(gulp.dest(dstRoot));
 }
 
+gulp.task('lint', function() {
+  gulp.src(srcRoot + '/**/*.js')
+      .pipe(jshint())
+      .pipe(jshint.reporter('jshint-stylish'));
+});
+
 // Utility tasks
 gulp.task('clean-deployment', function(cb) {
   return del([

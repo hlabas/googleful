@@ -18,10 +18,10 @@
  * Calls a controller action with parameters as an object.
  * @param {string} controller The controller name.
  * @param {string} action The action function to invoke on the controller.
- * @param {object} param The parameters to pass to the action function.
+ * @param {array} param The parameters to pass to the action function.
  */
 function call(controller, action, params) {
-  return mvc().invoke(controller, action, params);
+  return mvc().invoke(controller, action, params || []);
 }
 
 

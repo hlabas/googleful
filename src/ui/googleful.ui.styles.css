@@ -1,5 +1,26 @@
-.sample-container {
-  margin:10px;
-  text-align: center;
+section {
+  padding: 5px 0;
+}
+
+.container {
+  padding: 10px;
   width: 100%
+}
+
+.confirm {
+  border: 1px solid #B7DED1;
+  background-color: #F4FFFC;
+  color: #536171;
+}
+
+.error {
+  border: 1px solid #D0A2A0;
+  background-color: #FBE3E2;
+}
+
+
+.auth-link {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #3d9400;
 }

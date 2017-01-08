@@ -32,25 +32,32 @@ function mvc() {
   return mvc;
 }
 
-
 /**
  * Called when a spreadsheet that is associated with this add-on is opened.
  * @param {Object} e Apps Script onInstall event object
  */
 function onOpen(e) {
   var addonMenu = SpreadsheetApp.getUi().createAddonMenu();
-  addonMenu.addItem('Show sidebar', 'onShowSidebar');
+  addonMenu.addItem('Configuration', 'onConfiguration');
   addonMenu.addToUi();
 }
 
 
+function onConfiguration() {
+  mvc().invoke('Configuration', 'showView');
+}
+
+function doGet(e) {
+  return HtmlService.createHtmlOutputFromFile('googleful.ui.authcallback');
+}
+
 function onShowSidebar() {
-  var contentful = new Contentful();
-  var ctrl = null;
-  if (!contentful.hasAccess()) {
-    ctrl = 'Configuration';
-  } else {
-    ctrl = 'Home';
-  }
-  mvc().invoke(ctrl, 'showView');
+  // var contentful = new Contentful();
+  // var ctrl = null;
+  // if (!contentful.hasAccess()) {
+  //   ctrl = 'Configuration';
+  // } else {
+  //   ctrl = 'Home';
+  // }
+  // mvc().invoke(ctrl, 'showView');
 }

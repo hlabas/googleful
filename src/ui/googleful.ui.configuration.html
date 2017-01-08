@@ -8,14 +8,72 @@
   </head>
 
   <body>
-    <div class="sample-container">
-      <input value="<?!= data.token ?>" id="token" type="text">
-      <button class="action" id="save" onclick="save();">Save</button>
+    <div class="container">
+      <div id="confirm"></div>
+
+      <section id="app-settings" style="display: <?!= !configured ? 'block' : 'none' ?>">
+        <h3>Application settings</h3>
+        <p>
+          There's no configured Contentful application defined yet, you must
+          <a href="https://app.contentful.com/account/profile/developers/applications/new">create
+          a Contentful OAuth application</a>, and provide the following
+          information:
+        </p>
+        <div class="block form-group">
+          <label for="uid">UID:</label>
+          <input id="uid" type="text" value="<?= data.clientId ?>" prompt="UID" class="field" style="width: 100%">
+        </div>
+        <div class="block form-group">
+          <label for="secret">Secret:</label>
+          <input id="secret" type="text" value="<?= data.clientSecret ?>" prompt="Secret" style="width: 100%">
+        </div>
+        <div class="block form-group">
+          <button class="action" onclick="saveAppConfig()">Save</button>
+        </div>
+      </section>
+      <section id="authorization" style="display: <?!= configured && !authorized ? 'block' : 'none' ?>">
+        <h3>Authorization</h3>
+        <p>You must authorize the Googleful addon to access Contentful and
+          manage your content using this spreadsheet.</p>
+        <span class="auth-link">
+          <a href="<?!= authorizationUrl ?>" target="_blank"
+             id="auth-link" class="share" onclick="authClick()">Authorize now</a>
+       </span>
+
+       <div class="check-auth" id="check-auth">
+         <span>
+           <button type="button" id="show-token" onclick="showToken()" class="share">Show token</button>
+           <a id="hide-auth" onclick="hideAuth()">Hide</a>
+         </span>
+         <p id="auth-token" style="display: none;"></p>
+       </div>
+      </section>
+      <section id="space-settings">
+        <h3>Space settings</h3>
+        <p>You can setup the space you wish to use across this spreadsheet.</p>
+        <div class="block form-group">
+          <label for="space">Space ID:</label>
+          <input id="space" type="text" value="<?= data.spaceId ?>" prompt="Space">
+        </div>
+        <div class="block form-group">
+          <button class="action" onclick="saveSpaceConfig()">Save</button>
+        </div>
+      </section>
+      <section id="reset-config-section" style="display: <?!= configured ? 'block' : 'none' ?>">
+        <h3>Reset</h3>
+        <p>You can reset the current configuration to connect your spreadsheet
+          to another Contentful application.</p>
+        <button id="reset-config"
+                onclick="resetConfig()" type="button" class="create"
+                <?!= configured ? '' : 'disabled' ?>>
+          Reset configuration
+        </button>
+      </section>
     </div>
   </body>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script>
     <?!= include('googleful.ui.configuration.js'); ?>
     <?!= include('lib.client.js'); ?>
   </script>
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 </html>
