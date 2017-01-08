@@ -3,7 +3,7 @@
   <link rel=stylesheet
       href=https://ssl.gstatic.com/docs/script/css/add-ons1.css />
   <style>
-    <?!= include('googleful.styles.css'); ?>
+    <?!= include('googleful.ui.styles.css'); ?>
     </style>
   </head>
   <body>
@@ -12,8 +12,7 @@
     </div>
   </body>
   <script>
-    var mode = '<?!= mode ?>';
-    <?!= include('googleful.home.controller.client.js'); ?>
+    <?!= include('googleful.ui.home.js'); ?>
     <?!= include('lib.client.js'); ?>
   </script>
 </html>

@@ -7,9 +7,11 @@ function save() {
   }
   google.script.run
       .withSuccessHandler(saveSuccess)
-      .call(CTRL, 'saveConfig', {
-        "token": tokenValue
-      });
+      .call(CTRL, 'saveConfig', [
+        {
+          "token": tokenValue
+        }
+      ]);
 }
 
 function saveSuccess() {

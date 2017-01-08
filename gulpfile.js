@@ -54,8 +54,7 @@ gulp.task('copy-latest', ['clean-deployment'], function() {
 function copyServerCode() {
   return gulp.src([
     srcRoot + '/server/*.js',
-    srcRoot + '/libs/*.js',
-    srcRoot + '/ui/*.server.js'])
+    srcRoot + '/libs/*.js'])
       .pipe(gulp.dest(dstRoot));
 }
 
@@ -65,7 +64,7 @@ function copyClientCode() {
   return gulp.src([
     srcRoot + '/ui/*.html',
     srcRoot + '/ui/*.css',
-    srcRoot + '/ui/*.client.js'])
+    srcRoot + '/ui/*.js'])
       .pipe(
       rename(function(path) {
         if (path.extname !== '.html') {

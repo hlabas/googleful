@@ -3,8 +3,7 @@ function ConfigurationController () {
 }
 
 ConfigurationController.prototype.showView = function() {
-  var html = HtmlService.createTemplateFromFile('googleful.configuration.view');
-  html.mode = 'addon';
+  var html = HtmlService.createTemplateFromFile('googleful.ui.configuration');
   html.data = {
     "token": this.cma.getToken()
   };

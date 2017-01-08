@@ -1,4 +1,4 @@
-// Copyright 2015 Google Inc. All Rights Reserved.
+// Copyright 2017 Contentful GmbH. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,15 @@ function assertEquals_(expected, actual, opt_message) {
 
 
 /**
+ * Fails unit test with provided message.
+ * @param {string} message The failure message.
+ */
+function fail_(message) {
+  throw new Error('FAIL: ' + message);
+}
+
+
+/**
  * Asserts that two values are not equal. Throws an error if they are.
  * @private
  * @param {*} unexpected The value which is not expected.
@@ -55,6 +64,20 @@ function assertNotEquals_(unexpected, actual, opt_message) {
 function assertTrue_(condition, opt_message) {
   if (!condition) {
     var message = opt_message || 'The condition is not true.';
+    throw new Error(message);
+  }
+}
+
+
+/**
+ * Asserts that the condition is false. Throws an error if it is not.
+ * @private
+ * @param {boolean} condition The condition.
+ * @param {string=} opt_message The message to include in the error
+ */
+function assertFalse_(condition, opt_message) {
+  if (condition) {
+    var message = opt_message || 'The condition is not false.';
     throw new Error(message);
   }
 }

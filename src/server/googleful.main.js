@@ -13,13 +13,27 @@
 // limitations under the License.
 
 
+
 /**
- * Logs an Apps Script exception, including the call stack
- * @private
- * @param {Object} e Apps Script runtime error object
+ * Calls a controller action with parameters as an object.
+ * @param {string} controller The controller name.
+ * @param {string} action The action function to invoke on the controller.
+ * @param {object} param The parameters to pass to the action function.
  */
-function logException_(e) {
-  Logger.log('Apps Script runtime exception:');
-  Logger.log(e.message);
-  Logger.log('\n' + e.stack + '\n');
+function call(controller, action, params) {
+  return mvc().invoke(controller, action, params);
+}
+
+
+/**
+ * Passed into the configuration factory constructor
+ * @return {googleful.json.Configuration} Default configuration settings.
+ */
+function getDefaultConfiguration_() {
+  return {
+    debug: false,
+    sheets: {
+      debugSpreadsheetId: null
+    }
+  };
 }

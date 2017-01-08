@@ -4,36 +4,39 @@ var MVC = function () {
   /**
    * White list of controllers.
    */
-  this.availControllers_ = [];
+  this.availControllers_ = {};
 
   /**
    * Current controller instance.
    */
   this.controller_ = null;
-}
+};
 
 /**
  * Adds a given controller name to the accepted list.
- * @param {string} controllerName Name of the controller to whitelist.
+ * @param {string} controllerName Controller name.
+ * @param {Function} controller Controller constructor function to whitelist.
  */
-MVC.prototype.whiteListController = function (controllerName) {
-  this.availControllers_.push(controllerName);
+MVC.prototype.whiteListController = function (controllerName, controller) {
+  this.availControllers_[controllerName] = controller;
 };
 
 
 /**
- * Invokes an action on a given controller.
+ * Invokes an action on a given controller. Action function parameters can be
+ * added after the 2nd parameter.
  * @param {string} controllerName Name of the controller where the action is
  *     located.
  * @param {string} action Name of the action function to invoke.
- * @param {array} ...params Params to pass through the action function.
+ * @param {Array} params Parameters to pass to the action function.
  */
 MVC.prototype.invoke = function (controllerName, action, params) {
   this.controller_ = this.resolveController_(controllerName);
   if (typeof(this.controller_[action] === 'function')) {
-    var action = this.controller_[action];
-    action.apply(this.controller_, params);
+    var actionFunction = this.controller_[action];
+    return actionFunction.apply(this.controller_, params);
   }
+  return null;
 };
 
 
@@ -42,9 +45,9 @@ MVC.prototype.invoke = function (controllerName, action, params) {
  * @param {string} controllerName Name of the controller.
  */
 MVC.prototype.resolveController_ = function (controllerName) {
-  if (this.availControllers_.indexOf(controllerName) === -1) {
+  if (!this.availControllers_.hasOwnProperty(controllerName)) {
     throw new Error('Unknown controller name: ' + controllerName);
   }
-  var controllerClass = controllerName + 'Controller';
+  var controllerClass = this.availControllers_[controllerName];
   return new controllerClass();
 };

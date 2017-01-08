@@ -2,6 +2,8 @@
   "author": "mhessinger@google.com",
   "dependencies": {
     "del": "^2.2.0",
+    "google-auth-library": "^0.9.10",
+    "googleapis": "^15.1.0",
     "gulp": "^3.9.0",
     "gulp-debug": "^2.1.2",
     "gulp-jshint": "^1.12.0",

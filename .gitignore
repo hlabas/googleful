@@ -5,3 +5,4 @@ cert.pem
 key.pem
 ssl.local.py
 googleful.oauth.json
+testsuite_oauth.json

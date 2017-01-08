@@ -1,13 +1,16 @@
-This project allows you to fetch and edit content hosted on Contentful from within a Google spreadsheet.
+This sample shows how to use a task runner and command line tools to develop Apps Script projects. There are quite a few setup steps, but they do mimic some typical one-time tasks you'd be doing in any given development project.
 
-### Requirements
+### Getting started
+
+This sample uses the community project [node-google-apps-script](https://www.npmjs.com/package/node-google-apps-script). Before working with the sample, perform the following steps:
 
 1. run `npm install -g node-google-apps-script` to install it globally. This will allow you to run a few of the steps below from the command line.
 2. Go through the [configuration and authorization steps](https://www.npmjs.com/package/node-google-apps-script).
 2. Run `npm install -g gulp` if you do not already have the [gulp](http://gulpjs.com/) task runner installed globally.
-3. Clone this repository, `cd googleful`, and run `npm install`. This will set up all of the local dependencies for the project.
+3. Clone this repository, `cd google-apps-script-samples/import_export_development`, and run `npm install`. This will set up all of the local dependencies for the project.
 
-### Setting up a development environment
+### Demonstrating the developer flow
+To get the initial setup working for you, perform the following steps. In a real project, each developer would perform these steps, so that they can do development in isolation from other developers:
 
 1. Create a [new Google Spreadsheet](https://docs.google.com/spreadsheets/create), and copy the ID of the file. The file ID is found in the URL to the spreadsheet:
 	docs.google.com/spreadsheets/d/***DRIVE_FILE_ID***/edit#gid=123
@@ -51,3 +54,4 @@ This final phase mimics the setup to prepare for a production deployment. This w
 3. You can also create a new spreadsheet, set up for add-on testing, and the code will run successfully.
 
 For production, the configuration file does *not* have a specific spreadsheet, and has the annotation @onlycurrent doc. That will ensure that only Spreadsheets that the code has been linked via the Add-on can be accessed. This limiting of scope is a good practice to provide more confidence to your users that you are only working on sheets that they have linked to your add-on.
+

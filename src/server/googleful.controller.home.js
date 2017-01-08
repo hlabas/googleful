@@ -11,8 +11,7 @@ function HomeController() {
  * Displays the home view.
  */
 HomeController.prototype.showView = function() {
-  var html = HtmlService.createTemplateFromFile('googleful.home.view');
-  html.mode = 'addon';
+  var html = HtmlService.createTemplateFromFile('googleful.ui.home');
   SpreadsheetApp.getUi()
       .showSidebar(html.evaluate()
       .setSandboxMode(HtmlService.SandboxMode.IFRAME));

@@ -1,4 +1,4 @@
-// Copyright 2015 Google Inc. All Rights Reserved.
+// Copyright 2017 Contentful GmbH. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ function getSpreadsheetUrl_(fileId, gid) {
  * a Spreadsheet (as an add-on), but also may run separate (testing, Execution
  * API, etc.).
  * @constructor
- * @param {myproj.json.Configuration} config a valid configuration object
+ * @param {googleful.json.Configuration} config a valid configuration object
  *    instance.
  */
 function SheetsUtilitiesLibrary(config) {
@@ -55,16 +55,6 @@ SheetsUtilitiesLibrary.prototype.getCurrentActiveSpreadsheet = function() {
   } else {
     return SpreadsheetApp.getActiveSpreadsheet();
   }
-};
-
-
-/**
- * Shows a toast message in the current active spreadsheet.
- * @param {String} msg The message to display.
- * @param {String} title The title of the toast.
- */
-SheetsUtilitiesLibrary.prototype.showToast = function(msg, title) {
-  this.getCurrentActiveSpreadsheet().toast(msg, title, 4);
 };
 
 
@@ -154,4 +144,3 @@ SheetsUtilitiesLibrary.prototype.activateById = function(sheetId)  {
     sheet.activate();
   }
 };
-

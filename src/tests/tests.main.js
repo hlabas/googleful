@@ -1,4 +1,4 @@
-// Copyright 2015 Google Inc. All Rights Reserved.
+// Copyright 2017 Contentful GmbH. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,21 @@
 
 
 function runAllTests() {
-  var sampleTests = new SampleTests();
-  sampleTests.run();
+  runMVCTests();
+  runContentfulTests();
 }
 
+
+function runMVCTests() {
+  var tests = new MVCTests();
+  tests.run();
+}
+
+
+function runContentfulTests() {
+  var tests = new ContentfulTests();
+  tests.run();
+}
 
 
 /**
@@ -55,26 +66,3 @@ Tests.prototype.run = function() {
   Logger.log(failCount + ' tests failed:\n' + failNames.join('\n'));
   Logger.log('');
 };
-
-
-var MVCTests = function() {
-  Tests.call(this);
-};
-inherit_(MVCTests, Tests);
-
-
-MVCTests.prototype.testInvoke = function () {
-  var Test = function () {};
-  Test.prototype.testSimpleAction = function () {
-    return true;
-  }
-  Test.prototype.testSimpleParamAction = function (variable) {
-    return variable;
-  }
-  var mvc = new MVC();
-  mvc.whiteListController('Test');
-  var result = mvc.invoke('Test', 'testSimpleAction');
-  assertEquals_(true, result);
-  result = mvc.invoke('Test', 'testSimpleParamAction', 'test');
-  assertEquals_('test', result);
-}
