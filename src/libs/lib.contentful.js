@@ -87,7 +87,7 @@ Contentful.prototype.hasAccess = function() {
  * OAuth.
  * @param {string} clientId     The App ID.
  * @param {string} clientSecret The App's secret.
- * @param {stirng} opt_spaceId  Space ID to use to perform calls to the API.
+ * @param {string} opt_spaceId  Space ID to use to perform calls to the API.
  */
 Contentful.prototype.configure = function (clientId, clientSecret, opt_spaceId) {
   this.clientId_ = clientId;
@@ -101,7 +101,7 @@ Contentful.prototype.configure = function (clientId, clientSecret, opt_spaceId) 
 
 /**
  * Sets the space ID to use for all space-related API calls.
- * @param {stirng} spaceId Space ID to use to perform calls to the API.
+ * @param {string} spaceId Space ID to use to perform calls to the API.
  */
 Contentful.prototype.setSpaceId = function (spaceId) {
   this.spaceId_ = spaceId;
@@ -237,12 +237,13 @@ Contentful.prototype.isConfigured = function () {
 /**
  * Performs a Content Management API call.
  * @param  {string} path URL path to use for the call
+ * @param  {string} method HTTP method to send (defaults to GET)
  * @return {Object}      The JSON response from the API call.
  */
-Contentful.prototype.baseApiCall = function(path) {
+Contentful.prototype.baseApiCall = function(path, method) {
   // TODO: handle additional headers as a parameter.
   var options = {
-    "method": 'get',
+    "method": method || 'GET',
     "headers": {
       "Authorization": "Bearer " + this.token_
     }
@@ -258,12 +259,12 @@ Contentful.prototype.baseApiCall = function(path) {
  * @param  {string} path URL path to use for the call
  * @return {Object}      The JSON response from the API call.
  */
-Contentful.prototype.apiCall = function(path) {
-  if (!this.spaceId) {
+Contentful.prototype.apiCall = function(path, method) {
+  if (!this.spaceId_) {
     throw new Error('No Space ID was configured. Call to "' + path + '" aborted.');
   }
   path = this.sanitizePath_(path);
-  return this.baseApiCall('/spaces/' + this.spaceId_ + path);
+  return this.baseApiCall('/spaces/' + this.spaceId_ + path, method);
 };
 
 

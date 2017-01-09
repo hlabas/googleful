@@ -1,11 +1,11 @@
 <script>
-function onGetContentTypesClick() {
+function initWithContentType() {
   google.script.run
-      .withSuccessHandler(getContentTypesSuccess)
-      .getContentTypes(mode);
+      .withSuccessHandler(initWithContentTypeSuccess)
+      .call('Home', 'initSheet', [$('#contentType').val()]);
 }
 
-function getContentTypesSuccess(result) {
+function initWithContentTypeSuccess(result) {
   console.log('Result', result);
 }
 </script>

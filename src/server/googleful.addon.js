@@ -38,8 +38,9 @@ function mvc() {
  * @param {Object} e Apps Script onInstall event object
  */
 function onOpen(e) {
-  var addonMenu = SpreadsheetApp.getUi().createAddonMenu();
+  var addonMenu = SpreadsheetApp.getUi().createMenu('Contentful');
   addonMenu.addItem('Configuration', 'onConfiguration');
+  addonMenu.addItem('Open Contentful panel', 'onShowSidebar');
   addonMenu.addToUi();
 }
 
@@ -47,17 +48,10 @@ function onConfiguration() {
   mvc().invoke('Configuration', 'showView');
 }
 
-function doGet(e) {
-  return mvc().invoke('AuthCallback', 'showView');
+function onShowSidebar() {
+  mvc().invoke('Home', 'showView');
 }
 
-function onShowSidebar() {
-  // var contentful = new Contentful();
-  // var ctrl = null;
-  // if (!contentful.hasAccess()) {
-  //   ctrl = 'Configuration';
-  // } else {
-  //   ctrl = 'Home';
-  // }
-  // mvc().invoke(ctrl, 'showView');
+function doGet(e) {
+  return mvc().invoke('AuthCallback', 'showView');
 }

@@ -1,0 +1,20 @@
+<html>
+  <head>
+  <link rel=stylesheet
+      href=https://ssl.gstatic.com/docs/script/css/add-ons1.css />
+  <style>
+    <?!= include('googleful.ui.styles.css'); ?>
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      The addon is not properly configured. Please update your settings.
+      <button type="button" class="action" onclick="showSettings()">Open configuration</button>
+    </div>
+  </body>
+  <script>
+    function showSettings() {
+      google.script.run.onConfiguration();
+    }
+  </script>
+</html>

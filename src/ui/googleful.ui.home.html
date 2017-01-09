@@ -4,13 +4,26 @@
       href=https://ssl.gstatic.com/docs/script/css/add-ons1.css />
   <style>
     <?!= include('googleful.ui.styles.css'); ?>
-    </style>
+  </style>
   </head>
   <body>
-    <div class=sample-container>
-      <button class=action id=runServer onclick=onGetContentTypesClick();>Get content types</button>
+    <div class="sidebar-container">
+      <div class="block form-group">
+        <label for="contentType">Choose a content type to use for initializing your spreadsheet:</label>
+        <select name="contentType" id="contentType">
+        <?
+           for (var i = 0; i < contentTypes.length; i++) {
+             var ct = contentTypes[i];
+        ?>
+        <option id="ct<?!= ct.sys.id ?>" value="<?!= ct.sys.id ?>"><?!= ct.name ?></option>
+        <? } ?>
+        </select>
+      </div>
+      <div class="block form-group">
+        <button id="init" class="action" onclick="initWithContentType()">Initialize</button>
+      </div>
     </div>
   </body>
-  <?!= include('googleful.ui.home.js.html'); ?>
   <?!= include('lib.client.js.html'); ?>
+  <?!= include('googleful.ui.home.js.html'); ?>
 </html>
