@@ -16,3 +16,16 @@
 // it is attached to via a user installing and activating the add-on.
 /** @OnlyCurrentDoc */
 // Put additional production configuration here
+
+
+/**
+ * @param {googleful.json.Configuration} configuration
+ *     The current configuration settings.
+ * @return {googleful.json.Configuration} configuration
+ *     The current configuration settings, updated with test settings.
+ */
+ function provideEnvironmentConfiguration_(configuration) {
+  // Web app ID used for the redirect URI of the OAuth flow.
+  // configuration.appId = 'AKfycbzhTBw-a7rqfmdqZ3cu2scfsk4HGxqYKb4uxc8HlWw';
+  return configuration;
+}

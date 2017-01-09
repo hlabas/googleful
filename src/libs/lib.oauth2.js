@@ -21,8 +21,6 @@
 // ID "1I21uLOwDKdyF3_W_hvh6WXiIKWJWno8yG9lB8lf1VBnZFQ6jAAhyNTRG".
 var _ = Underscore.load();
 
-var APP_ID = 'AKfycbzT15ri6tOu10Yr8D0SwWxue9GZ4Ll1n_4wIJojuAQm';
-
 /**
  * The supported formats for the returned OAuth2 token.
  * @type {Object.<string, string>
@@ -49,8 +47,8 @@ var OAuth2 = {
   * @param {string} serviceName The name of the service.
   * @return {OAuthService} The service object.
   */
-  createService: function(serviceName) {
-    return new OAuthService(serviceName);
+  createService: function(serviceName, scriptId) {
+    return new OAuthService(serviceName, scriptId);
   },
 
   /**
@@ -63,5 +61,5 @@ var OAuth2 = {
 };
 
 var getRedirectUri = function(scriptId) {
-  return Utilities.formatString('https://script.google.com/macros/s/%s/dev', APP_ID);
+  return Utilities.formatString('https://script.google.com/macros/s/%s/dev', scriptId);
 };

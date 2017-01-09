@@ -1,4 +1,29 @@
+<script>
 var CTRL = 'Configuration';
+
+function initSpaces() {
+  google.script.run
+      .withSuccessHandler(listSpacesSuccess)
+      .call(CTRL, 'listSpaces');
+  $('#space-settings').show();
+  $('#space').hide();
+  $('#space-loading').text('Fetching spaces...');
+}
+
+function listSpacesSuccess(spaces) {
+  for (var i = 0; i < spaces.items.length; i++) {
+    var opt = $("<option></option>");
+    var space = spaces.items[i];
+    opt.val(space.sys.id);
+    opt.text(space.name);
+    if (configuredSpace == space.sys.id) {
+      opt.prop('selected', true);
+    }
+    $('#space').append(opt);
+  }
+  $('#space-loading').text('Space:');
+  $('#space').show();
+}
 
 function saveAppConfig() {
   var errorMsg = '';
@@ -29,7 +54,7 @@ function saveAppSuccess(result) {
     $('#auth-link').attr('href', result);
     $('#app-settings').hide();
     $('#authorization').show();
-    $('#reset-config').enable();
+    $('#reset-config-section').show();
   } else {
     error('The provided configuration is invalid or could not be saved.');
   }
@@ -41,16 +66,19 @@ function authClick() {
 }
 
 function showToken() {
-  $('#auth-token').text('Fetching...');
+  $('#auth-token').show().text('Fetching...');
   google.script.run
       .withSuccessHandler(function (tok) {
         $('#auth-token').text(tok);
+        $('#auth-token-section').show();
+        $('#auth-token-section span').text(tok);
+        $('#authorization').hide();
+        initSpaces();
       })
-      .call(CTRL, 'getToken');
-}
-
-function hideAuth() {
-  $('#authorization').hide();
+      .withFailureHandler(function (err) {
+        $('#auth-token').text('Error verifying the token: ' + err.message);
+      })
+      .call(CTRL, 'initToken');
 }
 
 function saveSpaceConfig() {
@@ -85,10 +113,14 @@ function resetConfig() {
 }
 
 function resetSuccess() {
+  $('.confirm').text('').hide();
   $('#uid').val('');
   $('#secret').val('');
   $('#space').val('');
-  $('#configuration').show();
-  $('#auth').hide();
-  $('#reset-config').disable();
+  $('#app-settings').show();
+  $('#authorization').hide();
+  $('#auth-token-section').hide();
+  $('#space-settings').hide();
+  $('#reset-config-section').hide();
 }
+</script>

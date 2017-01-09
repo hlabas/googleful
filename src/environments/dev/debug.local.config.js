@@ -25,9 +25,10 @@
  *     The current configuration settings, updated with test settings.
  */
  function provideEnvironmentConfiguration_(configuration) {
-  //TODO: (blog post reader) Change ID below to a Spreadsheet ID you can read
   configuration.sheets.debugSpreadsheetId =
       '1GvDjYw2sJB54tvmWo3yuXKuiXa4oIUI2OqenFPyZUeQ';
   configuration.debug = true;
+  // Web app ID used for the redirect URI of the OAuth flow.
+  configuration.appId = 'AKfycbzhTBw-a7rqfmdqZ3cu2scfsk4HGxqYKb4uxc8HlWw';
   return configuration;
 }

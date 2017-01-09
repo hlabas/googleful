@@ -23,9 +23,10 @@
 /**
  * Creates a new OAuth2 service.
  * @param {string} serviceName The name of the service.
+ * @param {string} scriptId The script ID to use as an override.
  * @constructor
  */
-var OAuthService = function(serviceName) {
+var OAuthService = function(serviceName, scriptId) {
   validate_({
     'Service name': serviceName
   });
@@ -33,7 +34,7 @@ var OAuthService = function(serviceName) {
   this.params_ = {};
   this.tokenFormat_ = TOKEN_FORMAT.JSON;
   this.tokenHeaders_ = null;
-  this.scriptId_ = eval('Script' + 'App').getScriptId();
+  this.scriptId_ = scriptId || eval('Script' + 'App').getScriptId();
   this.expirationMinutes_ = 60;
 };
 

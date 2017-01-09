@@ -123,12 +123,25 @@ Contentful.prototype.getClientSecret = function () {
   return this.clientSecret_;
 };
 
+/**
+ * Clears authentication data.
+ * @private
+ */
+Contentful.prototype.clearAuthData_ = function () {
+  if (this.oauth_ === null) {
+    // Any remaining settings should also be reset
+    this.initOAuth_();
+  }
+  this.oauth_.reset();
+  this.token_ = null;
+};
+
 
 /**
  * Resets the authentication token.
  */
 Contentful.prototype.resetAuth = function() {
-  this.token_ = null;
+  this.clearAuthData_();
   this.persistAPISettings_();
 };
 
@@ -137,10 +150,13 @@ Contentful.prototype.resetAuth = function() {
  * Resets the all the configuration, as well as the authentication token.
  */
 Contentful.prototype.resetConfig = function() {
+  // First clear auth data that could require client ID and secret, then clear
+  // settings.
+  this.clearAuthData_();
   this.clientId_ = null;
   this.clientSecret_ = null;
   this.spaceId_ = null;
-  this.resetAuth();
+  this.persistAPISettings_();
 };
 
 
@@ -151,7 +167,8 @@ Contentful.prototype.resetConfig = function() {
 Contentful.prototype.initOAuth_ = function() {
   if (this.oauth_ === null && this.clientId_ !== null &&
       this.clientSecret_ !== null) {
-    this.oauth_ = OAuth2.createService('contentful')
+    var appConfig = Configuration.getCurrent();
+    this.oauth_ = OAuth2.createService('contentful', appConfig.appId)
       .setAuthorizationBaseUrl(Contentful.AUTH_URL)
       .setTokenUrl(Contentful.TOKEN_URL)
       .setClientId(this.clientId_)
@@ -182,10 +199,10 @@ Contentful.prototype.getToken = function() {
  * @param {string} token The token to use to call the Contentful API.
  */
 Contentful.prototype.setToken = function(token) {
-  if (this.oauth_ === null) {
-    throw new Error('No OAuth service defined');
-  }
   this.token_ = token;
+  if (this.oauth_ === null) {
+    this.initOAuth_();
+  }
   this.oauth_.saveToken_({
     access_token: token,
     granted_time: getTimeInSeconds_(new Date()),

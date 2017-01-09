@@ -1,26 +1,37 @@
 section {
-  padding: 5px 0;
+  padding: 0;
 }
 
 .container {
-  padding: 10px;
-  width: 100%
+  margin: 0;
+  width: 100%;
 }
 
 .confirm {
   border: 1px solid #B7DED1;
   background-color: #F4FFFC;
   color: #536171;
+  padding: 10px;
 }
 
 .error {
   border: 1px solid #D0A2A0;
   background-color: #FBE3E2;
+  padding: 10px;
 }
 
-
-.auth-link {
+#auth-link {
   font-size: 1.2em;
   font-weight: bold;
   color: #3d9400;
+}
+
+#auth-token-section span {
+  font-family: monospace;
+  background-color: #F1F1F1;
+  color: #D0A2A0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid #AAA;
+  padding: 2px 3px;
 }

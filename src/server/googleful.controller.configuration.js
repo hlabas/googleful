@@ -14,11 +14,13 @@ ConfigurationController.prototype.showView = function () {
   template.authorizationUrl = this.cma.getAuthorizationUrl();
   template.configured = this.cma.isConfigured();
   template.authorized = this.cma.hasAccess();
+  template.token = this.cma.getToken();
   template.data = {
     clientId: this.cma.getClientId(),
     clientSecret: this.cma.getClientSecret(),
     spaceId: this.cma.getSpaceId()
   };
+  template.spaceSet = template.data.spaceId !== null;
   SpreadsheetApp.getUi()
     .showModalDialog(template.evaluate()
                        .setWidth(450)
@@ -28,20 +30,26 @@ ConfigurationController.prototype.showView = function () {
 
 
 /**
- * Returns the Content Management API token.
- * @return {string} The CMA token.
+ * Lists spaces for current user.
+ * @return {Object} The list of spaces connected application can access.
  */
-ConfigurationController.prototype.getToken = function () {
-  return this.cma.getToken();
+ConfigurationController.prototype.listSpaces = function () {
+  if (!this.cma.hasAccess()) {
+    throw new Error('Contentful is not properly configured');
+  }
+  return this.cma.baseApiCall('/spaces');
 };
 
 
 /**
- * Sets the Content Management API token.
- * @return {string} token The CMA token.
+ * Returns the Content Management API token.
+ * @return {string} The CMA token.
  */
-ConfigurationController.prototype.setToken = function (token) {
+ConfigurationController.prototype.initToken = function () {
+  // Fetches the user token and stores it for the document.
+  var token = new AuthCallbackController().getToken();
   this.cma.setToken(token);
+  return this.cma.getToken();
 };
 
 

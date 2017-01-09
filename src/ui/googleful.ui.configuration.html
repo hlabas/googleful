@@ -9,9 +9,14 @@
 
   <body>
     <div class="container">
-      <div id="confirm"></div>
-
-      <section id="app-settings" style="display: <?!= !configured ? 'block' : 'none' ?>">
+      <? if (configured && authorized && data.spaceId) { ?>
+      <div class="confirm">Looks like you are all set!</div>
+      <? } ?>
+      <section id="auth-token-section" style="display: <?!= token ? 'block' : 'none' ?>">
+        <h3>Management API token</h3>
+        <span><?!= token ?></span>
+      </section>
+      <section id="app-settings" style="display: <?!= configured ? 'none' : 'block' ?>">
         <h3>Application settings</h3>
         <p>
           There's no configured Contentful application defined yet, you must
@@ -40,20 +45,17 @@
              id="auth-link" class="share" onclick="authClick()">Authorize now</a>
        </span>
 
-       <div class="check-auth" id="check-auth">
-         <span>
-           <button type="button" id="show-token" onclick="showToken()" class="share">Show token</button>
-           <a id="hide-auth" onclick="hideAuth()">Hide</a>
-         </span>
-         <p id="auth-token" style="display: none;"></p>
+       <div class="check-auth" id="check-auth" style="display: none">
+         <button type="button" id="show-token" onclick="showToken()" class="share">Set space</button>
        </div>
       </section>
-      <section id="space-settings">
+      <section id="space-settings" style="display: <?!= authorized && !spaceSet ? 'block' : 'none' ?>">
         <h3>Space settings</h3>
         <p>You can setup the space you wish to use across this spreadsheet.</p>
         <div class="block form-group">
-          <label for="space">Space ID:</label>
-          <input id="space" type="text" value="<?= data.spaceId ?>" prompt="Space">
+          <label for="space" id="space-loading">Space:</label>
+          <select id="space">
+          </select>
         </div>
         <div class="block form-group">
           <button class="action" onclick="saveSpaceConfig()">Save</button>
@@ -72,8 +74,14 @@
     </div>
   </body>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <?!= include('googleful.ui.configuration.js.html'); ?>
+  <?!= include('lib.client.js.html'); ?>
   <script>
-    <?!= include('googleful.ui.configuration.js'); ?>
-    <?!= include('lib.client.js'); ?>
+    var authorized = <?!= authorized ? 'true' : 'false' ?>;
+    var configured = <?!= configured ? 'true' : 'false' ?>;
+    var configuredSpace = <?!= data.spaceId ? "'" + data.spaceId + "'" : "null" ?>;
+    if (authorized) {
+      initSpaces();
+    }
   </script>
 </html>

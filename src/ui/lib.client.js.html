@@ -1,8 +1,9 @@
+<script>
 function confirm(msg) {
-  $('div.confirm').append().text(msg).fadeIn().delay(2000).fadeOut().remove();
+  $('div.confirm').text(msg).fadeIn().delay(2000).fadeOut();
 }
 function error(msg) {
-  $('div.confirm').append().text(msg).addClass('error').fadeIn().delay(2000);
+  $('div.confirm').text(msg).toggleClass('error').fadeIn().delay(2000);
 }
 
 function closeInfoBox() {
@@ -12,3 +13,4 @@ function closeInfoBox() {
 function nullOrEmpty(val) {
   return (val === null || val === '');
 }
+</script>

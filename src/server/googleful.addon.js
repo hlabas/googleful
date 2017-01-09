@@ -29,6 +29,7 @@ function mvc() {
   var mvc = new MVC();
   mvc.whiteListController('Configuration', ConfigurationController);
   mvc.whiteListController('Home', HomeController);
+  mvc.whiteListController('AuthCallback', AuthCallbackController);
   return mvc;
 }
 
@@ -42,13 +43,12 @@ function onOpen(e) {
   addonMenu.addToUi();
 }
 
-
 function onConfiguration() {
   mvc().invoke('Configuration', 'showView');
 }
 
 function doGet(e) {
-  return HtmlService.createHtmlOutputFromFile('googleful.ui.authcallback');
+  return mvc().invoke('AuthCallback', 'showView');
 }
 
 function onShowSidebar() {

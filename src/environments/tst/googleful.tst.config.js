@@ -25,5 +25,7 @@
  */
  function provideEnvironmentConfiguration_(configuration) {
   configuration.sheets.debugSpreadsheetId = '1NAVDpnAM5pvBGS342nMkMXSQ9YGFN9gWJRVYWudKkdE';
+  // Web app ID used for the redirect URI of the OAuth flow.
+  configuration.appId = 'AKfycbzhTBw-a7rqfmdqZ3cu2scfsk4HGxqYKb4uxc8HlWw';
   return configuration;
 }
