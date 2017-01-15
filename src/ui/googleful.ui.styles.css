@@ -17,6 +17,7 @@ section {
   background-color: #F4FFFC;
   color: #536171;
   padding: 10px;
+  display: none;
 }
 
 .error {

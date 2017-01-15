@@ -8,8 +8,9 @@
   </head>
   <body>
     <div class="sidebar-container">
+      <div class="confirm"></div>
       <div class="block form-group">
-        <label for="contentType">Choose a content type to use for initializing your spreadsheet:</label>
+        <label for="contentType">Initialize this sheet using the following content type:</label>
         <select name="contentType" id="contentType">
         <?
            for (var i = 0; i < contentTypes.length; i++) {
@@ -18,9 +19,15 @@
         <option id="ct<?!= ct.sys.id ?>" value="<?!= ct.sys.id ?>"><?!= ct.name ?></option>
         <? } ?>
         </select>
+        <a href="#" onclick="refreshContentTypes()" id="refresh-link">Refresh</a>
       </div>
       <div class="block form-group">
-        <button id="init" class="action" onclick="initWithContentType()">Initialize</button>
+        <button id="init" class="action" onclick="initWithContentType()">Initialize</button><br>
+        <cite>Note: this will erase all of its contents.</cite>
+      </div>
+      <hr>
+      <div class="block form-group">
+
       </div>
     </div>
   </body>

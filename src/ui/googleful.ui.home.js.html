@@ -1,11 +1,30 @@
 <script>
+
+function refreshContentTypes() {
+  $('#refresh-link').text('Loading...');
+  google.script.run
+      .withSuccessHandler(refreshContentTypesSuccess)
+      .call('Home', 'refreshContentTypes');
+}
+
 function initWithContentType() {
   google.script.run
       .withSuccessHandler(initWithContentTypeSuccess)
       .call('Home', 'initSheet', [$('#contentType').val()]);
 }
 
+function refreshContentTypesSuccess(contentTypes) {
+  $('#refresh-link').text('Refresh');
+  var $ct = $('#contentType');
+  $ct.empty();
+  for (var i = 0; i < contentTypes.length; i++) {
+    var ct = contentTypes[i];
+    $('<option/>', { value: ct.name }).attr('value', ct.sys.id)
+        .appendTo($ct);
+  }
+}
+
 function initWithContentTypeSuccess(result) {
-  console.log('Result', result);
+  confirm('The spreadsheet has been successfully intialized.');
 }
 </script>
