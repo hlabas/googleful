@@ -19,15 +19,10 @@
         <option id="ct<?!= ct.sys.id ?>" value="<?!= ct.sys.id ?>"><?!= ct.name ?></option>
         <? } ?>
         </select>
-        <a href="#" onclick="refreshContentTypes()" id="refresh-link">Refresh</a>
       </div>
       <div class="block form-group">
-        <button id="init" class="action" onclick="initWithContentType()">Initialize</button><br>
-        <cite>Note: this will erase all of its contents.</cite>
-      </div>
-      <hr>
-      <div class="block form-group">
-
+        <p><button id="init" class="action" onclick="initWithContentType()">Bind current sheet</button></p>
+        <p>Note: this will erase all of its contents.</p>
       </div>
     </div>
   </body>

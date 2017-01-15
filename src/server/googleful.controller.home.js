@@ -1,4 +1,3 @@
-
 /**
  * Home controller, in charge of proposing various options for editing
  * Contentful content.
@@ -10,7 +9,12 @@ function HomeController() {
 }
 
 
+/**
+ * Cache key for storing content types.
+ * @type {String}
+ */
 HomeController.CT_CACHE = 'contentTypes';
+
 
 /**
  * Displays the home view.
@@ -22,17 +26,22 @@ HomeController.prototype.showView = function() {
     SpreadsheetApp.getUi().showSidebar(error);
     return;
   }
-  var html = HtmlService.createTemplateFromFile('googleful.ui.home');
+  var template = HtmlService.createTemplateFromFile('googleful.ui.home');
   if (!this.contentTypes) {
     this.contentTypes = this.cma.apiCall('/content_types');
     // this.cache.set(HomeController.CT_CACHE, this.contentTypes);
   }
-  html.contentTypes = this.contentTypes.items;
+  template.contentTypes = this.contentTypes.items;
   SpreadsheetApp.getUi()
-      .showSidebar(html.evaluate().setTitle('Contentful panel')
+      .showSidebar(template.evaluate().setTitle('Contentful binding')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME));
 };
 
+
+/**
+ * Refreshes the list of content type from the cache.
+ * @return {Array<Object>} The list of content types.
+ */
 HomeController.prototype.refreshContentTypes = function () {
   this.contentTypes = this.cma.apiCall('/content_types');
   //  this.cache.set(HomeController.CT_CACHE, this.contentTypes);
@@ -40,34 +49,63 @@ HomeController.prototype.refreshContentTypes = function () {
 };
 
 
+/**
+ * Initializes a sheet using a given content type.
+ * @param  {string} contentTypeId ID of the content type to use for
+ *                                initialization.
+ */
 HomeController.prototype.initSheet = function (contentTypeId) {
-  // Check if user is ready.
-  // var ui = SpreadsheetApp.getUi();
-  // var response = ui.alert('This will clear the contents of this sheet. Continue?',
-  //     ui.ButtonSet.YES_NO);
-  // if (response == ui.Button.NO) {
-  //   return;
-  // }
   this.refreshContentTypes();
-
-  var currentSheet = SpreadsheetApp.getActiveSheet();
+  var contentType = this.getContentTypeById_(contentTypeId);
+  var currentSheet = this.checkForExistingBinding_(contentType.name);
+  if (null === currentSheet) {
+    // There was an existing binding and user asked to use it.
+    return;
+  }
   currentSheet.clear();
   currentSheet.getRange(1,1, currentSheet.getMaxRows(), currentSheet.getMaxColumns())
       .clearDataValidations();
 
-  // Find the content type from the list.
-  var contentType = null;
-  for (var i = 0; i < this.contentTypes.items.length; i++) {
-    if (this.contentTypes.items[i].sys.id == contentTypeId) {
-      contentType = this.contentTypes.items[i];
-      break;
-    }
-  }
+  // Get entries.
   var entries = this.cma.apiCall('/entries?content_type=' + contentType.sys.id);
 
-  // Get the column headers based on the fields.
+  // Get the column headers based on the fields, define rendering and validation
+  // rules.
+  var columns = this.formatEntriesGrid_(currentSheet, contentType);
+  var columnHeaders = _.map(columns, function(col) {
+    return col.name;
+  });
+
+  this.formatHeader_(currentSheet, contentType, columnHeaders);
+
+  var entriesContent = [];
+  for (i = 0; i < entries.items.length; i++) {
+    var entry = entries.items[i];
+    var entryRow = this.renderRow_(entry, columns);
+    entriesContent.push(entryRow);
+  }
+  if (entriesContent.length > 0) {
+    currentSheet.getRange(3,1, entriesContent.length, columns.length)
+        .setValues(entriesContent);
+  }
+};
+
+
+/**
+ * Formats the entries grid using renderers and validation rules according to
+ * the content type's fields.
+ * @private
+ * @param  {Sheet}  currentSheet The sheet in which we're operating.
+ * @param  {Object} contentType  The content type to use for initializing the
+ *                               grid.
+ * @return {Array<Object>}       List of column descriptors containing:
+ *                                  - id: The field ID.
+ *                                  - name: The field name
+ *                                  - renderer: The cell renderer
+ *                                  - rules: The validation rules
+ */
+HomeController.prototype.formatEntriesGrid_ = function (currentSheet, contentType) {
   var columns = [];
-  var columnHeaders = [];  // Needed to init headers at once.
   for (i = 0; i < contentType.fields.length; i++) {
     var ctField = contentType.fields[i];
     var renderer = this.getFieldRenderer_(ctField);
@@ -84,33 +122,79 @@ HomeController.prototype.initSheet = function (contentTypeId) {
     if (typeof(renderer.formatColumn) === 'function') {
       renderer.formatColumn(colRange);
     }
-    columnHeaders.push(ctField.name);
     columns.push({
       id: ctField.id,
-      renderer: renderer
+      name: ctField.name,
+      renderer: renderer,
+      rules: validationRules
     });
   }
-
-  this.formatHeader_(contentType, columnHeaders);
-
-  var entriesContent = [];
-  for (i = 0; i < entries.items.length; i++) {
-    var entry = entries.items[i];
-    var entryRow = this.renderRow_(entry, columns);
-    entriesContent.push(entryRow);
-  }
-  if (entriesContent.length > 0) {
-    currentSheet.getRange(3,1, entriesContent.length, columns.length)
-        .setValues(entriesContent);
-  }
+  return columns;
 };
 
 
-HomeController.prototype.formatHeader_ = function (contentType, columnHeaders) {
+/**
+ * Checks whether there's an existing sheet with the content type's name and
+ * proposes to navigate to it.
+ * @private
+ * @param  {stirng} contentTypeName Name of the content type, used for the sheet
+ *                                  title.
+ * @return {Sheet}                  The current sheet if user chose to create a
+ *                                  new sheet regardless of the existing one,
+ *                                  null otherwise.
+ */
+HomeController.prototype.checkForExistingBinding_ = function (contentTypeName) {
   var currentSheet = SpreadsheetApp.getActiveSheet();
+  var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var existingSheet = activeSpreadsheet.getSheetByName(contentTypeName);
+  if (existingSheet !== null && existingSheet.getIndex() !== currentSheet.getIndex()) {
+    var ui = SpreadsheetApp.getUi();
+    var response = ui.alert('A sheet is already named after this content type. Do you want to navigate there instead?',
+        ui.ButtonSet.YES_NO);
+    if (response == ui.Button.YES) {
+      SpreadsheetApp.setActiveSheet(existingSheet);
+      return null;
+    } else {
+      var copyCount = 1;
+      while (existingSheet !== null) {
+        existingSheet = activeSpreadsheet.getSheetByName(contentTypeName + ' ' + copyCount++);
+      }
+      currentSheet.setName(contentTypeName + ' ' + --copyCount);
+    }
+  } else {
+    currentSheet.setName(contentTypeName);
+  }
+  return currentSheet;
+};
 
-  // Init sheet name with content type's and add headers as second row
-  currentSheet.setName(contentType.name);
+
+/**
+ * Returns the content type using its ID.
+ * @private
+ * @param  {string} contentTypeId ID of the content type to get.
+ * @return {object}               Founds content type object.
+ */
+HomeController.prototype.getContentTypeById_ = function (contentTypeId) {
+  var contentType = null;
+  for (var i = 0; i < this.contentTypes.items.length; i++) {
+    if (this.contentTypes.items[i].sys.id == contentTypeId) {
+      contentType = this.contentTypes.items[i];
+      break;
+    }
+  }
+  return contentType;
+};
+
+
+/**
+ * Init sheet name with content type's and add headers as second row.
+ * @private
+ * @param  {Spreadsheet}   currentSheet  The current sheet in which to initialize
+ *                                       headers.
+ * @param  {Object}        contentType   The content type containing the fields.
+ * @param  {Array<string>} columnHeaders List of column headers.
+ */
+HomeController.prototype.formatHeader_ = function (currentSheet, contentType, columnHeaders) {
   currentSheet.getRange(1, 1).setValue(contentType.name).setFontSize(14)
       .setFontWeight('bold');
   currentSheet.getRange(1, 2).setValue(contentType.sys.id)
@@ -118,7 +202,6 @@ HomeController.prototype.formatHeader_ = function (contentType, columnHeaders) {
       .setFontSize(11)
       .setFontColor('#444444');
   currentSheet.setFrozenRows(2);
-
   var headersRow = currentSheet.getRange(2, 1, 1, columnHeaders.length)
       .setFontWeight('bold');
   headersRow.setValues([
@@ -127,6 +210,13 @@ HomeController.prototype.formatHeader_ = function (contentType, columnHeaders) {
 };
 
 
+/**
+ * Renders an entry on a row of the entries grid.
+ * @private
+ * @param  {Object}        entry   The entry to render.
+ * @param  {Array<Object>} columns The columns descriptors.
+ * @return {Array}                 The entry values to display in the grid.
+ */
 HomeController.prototype.renderRow_ = function (entry, columns) {
   // TODO: handle locales properly
   var settings = Configuration.getCurrent();
@@ -151,6 +241,12 @@ HomeController.prototype.renderRow_ = function (entry, columns) {
 };
 
 
+/**
+ * Computes the cell renderer to use depending on the Contentful field type.
+ * @private
+ * @param  {Object} field The Contentful field descriptor.
+ * @return {FieldRenderer} The cell renderer to use for the field.
+ */
 HomeController.prototype.getFieldRenderer_ = function (field) {
   switch (field.type) {
     case 'Array':
@@ -170,6 +266,13 @@ HomeController.prototype.getFieldRenderer_ = function (field) {
 };
 
 
+/**
+ * Builds a set of validation rules to apply to a column used for rendering a
+ * given field.
+ * @param  {Object} field      The field for which the validation rules must be
+ *                             built.
+ * @return {Array<Validation>} The list of validations to use for the column.
+ */
 HomeController.prototype.buildValidationRules_ = function(field) {
   var rules = [];
   if (field.required) {

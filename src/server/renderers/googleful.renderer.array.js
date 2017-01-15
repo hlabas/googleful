@@ -9,6 +9,9 @@ ArrayRenderer.prototype.renderValue = function(fieldValue) {
   if (fieldValue.length === 0) {
     return '';
   }
+  if (fieldValue.length === 1) {
+    return this.itemsType_ + ': ' + fieldValue[0].sys.id;
+  }
   switch (this.itemsType_) {
     case 'Asset':
       return this.pluralize_(fieldValue.length, ' asset');
@@ -23,5 +26,5 @@ ArrayRenderer.prototype.formatColumn = function(range) {
 };
 
 ArrayRenderer.prototype.pluralize_ = function(size, text, plural) {
-  return size > 1 ? (plural ? plural : text + 's') : text;
+  return size + (size > 1 ? (plural ? plural : text + 's') : text);
 };
