@@ -1,9 +1,20 @@
-function Cache() {
-  this.fetchCache_();
+/**
+ * Cache for values to attache either to connected user or to the document.
+ * @param {boolean?} userCache Use the user's cache storage if true, the
+ *                             document's if false. Defaults to false.
+ */
+function Cache(userCache) {
+  this.props_ = userCache ? CacheService.getUserCache() :
+      CacheService.getDocumentCache();
 }
 
 
-Cache.PROP_KEY = '__CF_CACHE';
+/**
+ * Key to prefix cached elements + used for the index.
+ * @type {String}
+ */
+Cache.PROP_KEY = '_CF_CACHE_';
+
 
 /**
  * Stores a value in the cache with an expiration
@@ -11,55 +22,44 @@ Cache.PROP_KEY = '__CF_CACHE';
  * @param {object} value  The value to cache
  * @param {number} expire The expiration time in seconds. Defaults to 24 hrs.
  */
-Cache.prototype.set = function (key, value, expire) {
+Cache.prototype.put = function (key, value, expire) {
   if (isNaN(expire)) {
-    expire = 24 * 60 * 3600; // 24 hrs expiration by default.
+    this.props_.put(Cache.PROP_KEY + key, JSON.stringify(value));
+  } else {
+    this.props_.put(Cache.PROP_KEY + key, JSON.stringify(value), expire);
   }
-  expire = expire * 1000;
-  this.keys_[key] = {
-    exp: new Date().getTime() + expire,
-    val: value
-  };
-  this.saveCache_();
 };
 
 
 /**
  * Gets a cached value.
  * @param  {string} key           The cache key
- * @return {boolean|null|Object}  null if nothing present in the cache, false if
- *                                    cache was expired, the value otherwise.
+ * @param  {mixed}  defaultValue  The default value in case the cache is not
+ *                                there or expired.
+ * @return {boolean|null|Object}  defaultValue if nothing present in the cache
+ *                                or expired, the value otherwise.
  */
-Cache.prototype.get = function (key) {
-  var now = new Date().getTime();
-  if (this.keys_.hasOwnProperty(key)) {
-    var cached = this.keys_[key];
-    if (cached.exp > now) {
-      return cached.val;
-    }
-    delete this.keys_[key];
-    this.saveCache_();
-    return false;
+Cache.prototype.get = function (key, defaultValue) {
+  var val = this.props_.get(Cache.PROP_KEY + key);
+  if (defaultValue !== undefined && val === null) {
+    return defaultValue;
   }
-  return null;
+  return JSON.parse(val);
 };
 
 
 /**
- * Persists the cache in the Document properties.
- * @private
+ * Removes a value from the cache.
+ * @param  {string} key The cache key
  */
-Cache.prototype.saveCache_ = function () {
-  PropertiesService.getDocumentProperties().setProperty(Cache.PROP_KEY,
-    JSON.stringify(this.keys_));
+Cache.prototype.remove = function (key) {
+  this.cache_.remove(Cache.PROP_KEY + key);
 };
 
 
-Cache.prototype.fetchCache_ = function () {
-  this.keys_ = JSON.parse(PropertiesService.getDocumentProperties()
-      .getProperty(Cache.PROP_KEY));
-  if (!this.keys_) {
-    this.keys_ = {};
-    this.saveCache_();
-  }
+/**
+ * Removes all values from the cache.
+ */
+Cache.prototype.removeAll = function () {
+  this.cache_.removeAll();
 };

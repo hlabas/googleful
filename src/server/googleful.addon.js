@@ -23,6 +23,24 @@ function onInstall(e) {
 
 
 /**
+ * Sets up triggers to handle changes propagation to Contentful.
+ */
+function setupTriggers() {
+  var sheet = SpreadsheetApp.getActive();
+  ScriptApp.newTrigger('onEdit')
+    .forSpreadsheet(sheet)
+    .onEdit()
+    .create();
+}
+
+/**
+ * Edit trigger.
+ */
+function onEdit(e) {
+  mvc().invoke('Editing', 'onEditTrigger', [e]);
+}
+
+/**
  * The MVC object that runs the server-side code logic.
  */
 function mvc() {
@@ -30,6 +48,8 @@ function mvc() {
   mvc.whiteListController('Configuration', ConfigurationController);
   mvc.whiteListController('Home', HomeController);
   mvc.whiteListController('AuthCallback', AuthCallbackController);
+  mvc.whiteListController('Editing', EditingController);
+  mvc.whiteListController('Debug', DebugController);
   return mvc;
 }
 
@@ -40,7 +60,11 @@ function mvc() {
 function onOpen(e) {
   var addonMenu = SpreadsheetApp.getUi().createMenu('Contentful');
   addonMenu.addItem('Configuration', 'onConfiguration');
-  addonMenu.addItem('Open Contentful panel', 'onShowSidebar');
+  addonMenu.addItem('Contentful panel', 'onShowSidebar');
+  var config = Configuration.getCurrent();
+  if (!config.debug) {
+    setupTriggers();
+  }
   addonMenu.addToUi();
 }
 

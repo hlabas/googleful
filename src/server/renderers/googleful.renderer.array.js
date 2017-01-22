@@ -10,6 +10,9 @@ ArrayRenderer.prototype.renderValue = function(fieldValue) {
     return '';
   }
   if (fieldValue.length === 1) {
+    if (this.itemsType_ === 'Symbol') {
+      return fieldValue[0];
+    }
     return this.itemsType_ + ': ' + fieldValue[0].sys.id;
   }
   switch (this.itemsType_) {

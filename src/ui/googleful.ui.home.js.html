@@ -17,10 +17,12 @@ function refreshContentTypesSuccess(contentTypes) {
   $('#refresh-link').text('Refresh');
   var $ct = $('#contentType');
   $ct.empty();
-  for (var i = 0; i < contentTypes.length; i++) {
-    var ct = contentTypes[i];
-    $('<option/>', { value: ct.name }).attr('value', ct.sys.id)
-        .appendTo($ct);
+  for (var i = 0; i < contentTypes.items.length; i++) {
+    var ct = contentTypes.items[i];
+    $ct.append($('<option>', {
+      value: ct.sys.id,
+      text: ct.name
+    }));
   }
 }
 

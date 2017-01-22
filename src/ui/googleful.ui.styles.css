@@ -41,3 +41,11 @@ section {
   border: 1px solid #AAA;
   padding: 2px 3px;
 }
+
+pre {
+  font-family: monospace;
+  background-color: #F1F1F1;
+  overflow: auto;
+  border: 1px solid #AAA;
+  padding: 2px 3px;
+}
