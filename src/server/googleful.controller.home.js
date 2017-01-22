@@ -5,6 +5,7 @@
 function HomeController() {
   this.cts_ = new ContentTypes();
   this.cma_ = new Contentful();
+  this.locs_ = new Locales();
 }
 
 
@@ -20,11 +21,14 @@ HomeController.prototype.showView = function() {
   }
   var template = HtmlService.createTemplateFromFile('googleful.ui.home');
   template.debug = Configuration.getCurrent().debug;
+  template.locales = this.locs_.getLocales();
   template.contentTypes = this.cts_.getContentTypes();
-  Logger.log(template.contentTypes);
   SpreadsheetApp.getUi()
-      .showSidebar(template.evaluate().setTitle('Contentful binding')
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME));
+      .showSidebar(
+          template.evaluate()
+          .setTitle('Contentful binding')
+          .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      );
 };
 
 
@@ -38,7 +42,7 @@ HomeController.prototype.refreshContentTypes = function () {
 };
 
 
-HomeController.prototype.initSheet = function (contentTypeId) {
+HomeController.prototype.initSheet = function (contentTypeId, localeCode) {
   var contentType = this.cts_.getContentTypeById(contentTypeId);
   if (!contentType) {
     Logger.log('No content type with provided ID.');
@@ -49,7 +53,7 @@ HomeController.prototype.initSheet = function (contentTypeId) {
     // There was an existing binding and user asked to use it.
     return;
   }
-  new ContentTypeSheet().init(contentType, currentSheet);
+  new ContentTypeSheet().init(contentType, currentSheet, localeCode);
 };
 
 

@@ -268,6 +268,25 @@ Contentful.prototype.apiCall = function(path, method) {
 };
 
 
+Contentful.prototype.put = function (path, headers, body) {
+  var options = {
+    "method": 'PUT',
+    "headers": _.extend({
+      "Authorization": "Bearer " + this.token_,
+      "Content-Type": 'application/vnd.contentful.management.v1+json'
+    }, headers || {}),
+    "payload": JSON.stringify(body),
+    "contentType": 'application/vnd.contentful.management.v1+json',
+    "muteHttpExceptions": true
+  };
+
+  Logger.log(options);
+  path = this.sanitizePath_(path);
+  var req = UrlFetchApp.fetch(Contentful.API_BASE + '/spaces/' + this.spaceId_ + path, options);
+  return JSON.parse(req.getContentText());
+};
+
+
 /**
  * Sanitizes a path used as part of an API call.
  * @param  {string} path Path to sanitize.

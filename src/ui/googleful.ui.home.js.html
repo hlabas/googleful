@@ -10,7 +10,10 @@ function refreshContentTypes() {
 function initWithContentType() {
   google.script.run
       .withSuccessHandler(initWithContentTypeSuccess)
-      .call('Home', 'initSheet', [$('#contentType').val()]);
+      .call('Home', 'initSheet', [
+          $('#contentType').val(),
+          $('#locales').val(),
+        ]);
 }
 
 function refreshContentTypesSuccess(contentTypes) {

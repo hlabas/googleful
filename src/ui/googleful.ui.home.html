@@ -9,20 +9,35 @@
   <body>
     <div class="sidebar-container">
       <div class="confirm"></div>
+      <p>Initialize this sheet using the following content type and locale:</p>
       <div class="block form-group">
-        <label for="contentType">Initialize this sheet using the following content type:</label>
+        <label for="contentType">Content type:</label>
         <select name="contentType" id="contentType">
-        <?
-           for (var i = 0; i < contentTypes.items.length; i++) {
-             var ct = contentTypes.items[i];
-        ?>
-        <option id="ct<?!= ct.sys.id ?>" value="<?!= ct.sys.id ?>"><?!= ct.name ?></option>
-        <? } ?>
-        </select> <a href="#" onclick="refreshContentTypes()" id="refresh-link">Refresh</a>
+          <?
+             for (var i = 0; i < contentTypes.items.length; i++) {
+               var ct = contentTypes.items[i];
+          ?>
+          <option id="ct<?!= ct.sys.id ?>" value="<?!= ct.sys.id ?>"><?!= ct.name ?></option>
+          <? } ?>
+        </select>
+      </div>
+      <div class="block form-group">
+        <label for="locales">Locale:</label>
+        <select name="locales" id="locales">
+          <?
+             for (var i = 0; i < locales.length; i++) {
+               var locale = locales[i];
+          ?>
+          <option value="<?!= locale.code ?>">
+            <?!= locale.name ?>
+          </option>
+          <? } ?>
+        </select>
+        <a href="#" onclick="refreshContentTypes()" id="refresh-link">Refresh</a>
       </div>
       <div class="block form-group">
         <p><button id="init" class="action" onclick="initWithContentType()">Bind current sheet</button></p>
-        <p>Note: this will erase all of its contents.</p>
+        <p class="hint">Note: this will erase all of its contents.</p>
       </div>
       <? if (debug) { ?>
         <?!= include('googleful.ui.debug.html'); ?>

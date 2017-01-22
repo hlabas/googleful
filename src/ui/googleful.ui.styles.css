@@ -9,7 +9,7 @@ section {
 
 .sidebar-container {
   margin: 10px;
-  width: 100%;
+  width: 280px;
 }
 
 .confirm {
@@ -26,6 +26,59 @@ section {
   padding: 10px;
 }
 
+.hint {
+  font-size: 9pt;
+  font-style: italic;
+  color: #666;
+  background-color: #f8faca;
+  border: 1px solid ##858763;
+  padding: 2px 1px;
+  margin: 0;
+}
+
+.debug {
+  border: 1px solid #222;
+  padding: 0 5px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: repeating-linear-gradient(
+    45deg,
+    #ffdfc4,
+    #fff9f2 10px,
+    #fff 10px,
+    #fff 20px
+  );
+}
+
+.debug h1 {
+  font-size: 12pt;
+  font-weight: bold;
+  color: black;
+  margin: 5px 0px;
+}
+
+pre {
+  font-family: monospace;
+  background-color: #F1F1F1;
+  overflow-y: auto;
+  max-height: 500px;
+  min-height: 100px;
+  border: 1px solid #AAA;
+  padding: 0;
+  margin: 5px 0;
+  width: 100%;
+}
+
+.debug-actions {
+  background: #fff;
+  padding: 5px;
+  border: 1px dotted darkgrey;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 #auth-link {
   font-size: 1.2em;
   font-weight: bold;
@@ -38,14 +91,6 @@ section {
   color: #D0A2A0;
   overflow-x: auto;
   overflow-y: hidden;
-  border: 1px solid #AAA;
-  padding: 2px 3px;
-}
-
-pre {
-  font-family: monospace;
-  background-color: #F1F1F1;
-  overflow: auto;
   border: 1px solid #AAA;
   padding: 2px 3px;
 }

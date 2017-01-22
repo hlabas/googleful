@@ -1,0 +1,34 @@
+<div class="debug">
+  <h1>Debug panel</h1>
+  <div class="debug-actions">
+    <button type="button" onclick="flagEdited()">Flag current cell as edited</button>
+    <button type="button" onclick="pushChanges()">Push changes</button>
+  </div>
+  <pre id="log">
+  </pre>
+</div>
+<script type="text/javascript">
+  function flagEdited() {
+    $('#log').text('Loading...');
+    google.script.run
+        .withSuccessHandler(confirmCall)
+        .withFailureHandler(failedCall)
+        .call('Debug', 'flagEdited');
+  }
+
+  function pushChanges() {
+    $('#log').text('Loading...');
+    google.script.run
+        .withSuccessHandler(confirmCall)
+        .withFailureHandler(failedCall)
+        .call('Debug', 'pushChanges');
+  }
+
+  function confirmCall(res) {
+    $('#log').text('Success: ' + JSON.stringify(res, null, 2));
+  }
+
+  function failedCall(res) {
+    $('#log').text('Failed: ' + JSON.stringify(res, null, 2));
+  }
+</script>
