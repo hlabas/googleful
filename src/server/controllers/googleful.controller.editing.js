@@ -83,5 +83,5 @@ EditingController.prototype.onEditTrigger = function (e) {
   fieldValue[localeCode] = val;
   this.editedEntries_[editKey][field.id] = fieldValue;
   this.cache_.put(EditingController.EDITED_CACHE, this.editedEntries_);
-  return this.commitChanges();
+  return this.editedEntries_;
 };
