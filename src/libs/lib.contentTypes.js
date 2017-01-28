@@ -20,7 +20,7 @@ ContentTypes.CT_CACHE = 'contentTypes';
  */
 ContentTypes.prototype.getContentTypes = function (reload) {
   if (reload === true) {
-    this.contentTypes_ = this.cma_.apiCall('/content_types');
+    this.contentTypes_ = this.cma_.get('/content_types').body;
     this.cache_.put(ContentTypes.CT_CACHE, this.contentTypes_);
   }
   return this.contentTypes_;

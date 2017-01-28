@@ -1,10 +1,18 @@
+/**
+ * Contentful API gateway.
+ */
 var Contentful = function () {
+  this.isRateLimited_ = false;
   this.token_ = null;
   this.oauth_ = null;
   this.clientId_ = null;
   this.clientSecret_ = null;
   this.spaceId_ = null;
+  this.pending_ = [];
   this.fetchAPISettings_();
+  // TODO: handle rate limiting using a time based trigger.
+  // this.monitorInterval_ = setInterval(this.monitorRateLimiting_.bind(this),
+  //     1000);
 };
 
 
@@ -81,6 +89,15 @@ Contentful.prototype.hasAccess = function() {
   return this.token_ !== null;
 };
 
+
+Contentful.prototype.monitorRateLimiting_ = function () {
+  this.isRateLimited_ = false;
+  if (this.pending_.length > 0) {
+    _.each(this.pending_, function(callDetails) {
+      this.performCall_(callDetails);
+    }.bind(this));
+  }
+};
 
 /**
  * Sets the CMA Application credentials in order to fetch an API token through
@@ -233,24 +250,44 @@ Contentful.prototype.isConfigured = function () {
       this.clientSecret_ !== null;
 };
 
+Contentful.prototype.performCall_ = function (callDetails) {
+  if (this.isRateLimited_) {
+    this.pending_.push(callDetails);
+    return;
+  }
+  var response = UrlFetchApp.fetch(callDetails.path, callDetails.options);
+  var rateLimitSeconds = response.getHeaders()['x-contentful-ratelimit-second-remaining'];
+  if (rateLimitSeconds === 0) {
+    this.isRateLimited_ = true;
+  }
+  var responseBody = JSON.parse(response.getContentText());
+  Logger.log(responseBody);
+  var isError = responseBody.sys.type === 'Error';
+  return {
+    "isError": isError,
+    "message": isError ? responseBody.sys.message : 'Success',
+    "body": JSON.parse(response.getContentText())
+  };
+};
 
 /**
  * Performs a Content Management API call.
- * @param  {string} path URL path to use for the call
- * @param  {string} method HTTP method to send (defaults to GET)
- * @return {Object}      The JSON response from the API call.
+ * @param  {string} path    URL path to use for the call
+ * @param  {string} method  HTTP method to send (defaults to GET)
+ * @return {Object}         The JSON response from the API call.
  */
-Contentful.prototype.baseApiCall = function(path, method) {
-  // TODO: handle additional headers as a parameter.
+Contentful.prototype.baseGet = function(path, headers) {
   var options = {
-    "method": method || 'GET',
-    "headers": {
+    "method": 'get',
+    "headers": _.extend({
       "Authorization": "Bearer " + this.token_
-    }
+    }, headers || {})
   };
   path = this.sanitizePath_(path);
-  var req = UrlFetchApp.fetch(Contentful.API_BASE + path, options);
-  return JSON.parse(req.getContentText());
+  return this.performCall_({
+    "path": Contentful.API_BASE + path,
+    "options": options
+  });
 };
 
 
@@ -259,31 +296,37 @@ Contentful.prototype.baseApiCall = function(path, method) {
  * @param  {string} path URL path to use for the call
  * @return {Object}      The JSON response from the API call.
  */
-Contentful.prototype.apiCall = function(path, method) {
+Contentful.prototype.get = function(path, headers) {
   if (!this.spaceId_) {
     throw new Error('No Space ID was configured. Call to "' + path + '" aborted.');
   }
   path = this.sanitizePath_(path);
-  return this.baseApiCall('/spaces/' + this.spaceId_ + path, method);
+  return this.baseGet('/spaces/' + this.spaceId_ + path, headers);
 };
 
 
+/**
+ * Performs a PUT on the API for the configured space.
+ * @param  {string} path    Path after /spaces/SPACE_ID to call.
+ * @param  {Object} headers Headers to add to the request.
+ * @param  {Object} body    Body of the request.
+ * @return {Object}         API call result.
+ */
 Contentful.prototype.put = function (path, headers, body) {
   var options = {
-    "method": 'PUT',
+    "method": 'put',
     "headers": _.extend({
-      "Authorization": "Bearer " + this.token_,
-      "Content-Type": 'application/vnd.contentful.management.v1+json'
+      "Authorization": 'Bearer ' + this.token_
     }, headers || {}),
     "payload": JSON.stringify(body),
     "contentType": 'application/vnd.contentful.management.v1+json',
     "muteHttpExceptions": true
   };
-
-  Logger.log(options);
   path = this.sanitizePath_(path);
-  var req = UrlFetchApp.fetch(Contentful.API_BASE + '/spaces/' + this.spaceId_ + path, options);
-  return JSON.parse(req.getContentText());
+  return this.performCall_({
+    "path": Contentful.API_BASE + '/spaces/' + this.spaceId_ + path,
+    "options": options
+  });
 };
 
 

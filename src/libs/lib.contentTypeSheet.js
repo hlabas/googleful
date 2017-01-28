@@ -5,6 +5,28 @@ function ContentTypeSheet() {
 }
 
 
+ContentTypeSheet.CT_ID_RANGE = 'A1';
+ContentTypeSheet.CT_NAME_RANGE = 'C1';
+ContentTypeSheet.LOCALE_RANGE = 'E1';
+ContentTypeSheet.HEADERS_ROW = 2;
+ContentTypeSheet.ENTRIES_START_ROW = 3;
+ContentTypeSheet.HIDDEN_COLUMNS = [
+  {
+    visible: false,
+    id: 'entryId',
+    name: 'Entry ID',
+    renderer: new StringRenderer(),
+    rules: []
+  },
+  {
+    visible: false,
+    id: 'version',
+    name: 'Version',
+    renderer: new NumberRenderer(),
+    rules: []
+  }
+];
+
 /**
  * Initializes a sheet using a given content type.
  * @param  {Object} contentType Content type to use for initialization.
@@ -25,8 +47,8 @@ ContentTypeSheet.prototype.init = function (contentType, sheet, localeCode) {
       this.sheet_.getMaxColumns()).clearDataValidations();
 
   // Get entries.
-  var entries = this.cma_.apiCall('/entries?content_type=' +
-      this.contentType_.sys.id);
+  var entries = this.cma_.get('/entries?content_type=' +
+      this.contentType_.sys.id).body;
 
   // Get the column headers based on the fields, define rendering and validation
   // rules.
@@ -43,8 +65,8 @@ ContentTypeSheet.prototype.init = function (contentType, sheet, localeCode) {
     entriesContent.push(entryRow);
   }
   if (entriesContent.length > 0) {
-    this.sheet_.getRange(3,1, entriesContent.length, columns.length)
-        .setValues(entriesContent);
+    this.sheet_.getRange(ContentTypeSheet.ENTRIES_START_ROW,1,
+        entriesContent.length, columns.length).setValues(entriesContent);
   }
 };
 
@@ -61,27 +83,17 @@ ContentTypeSheet.prototype.init = function (contentType, sheet, localeCode) {
  *                                  - rules: The validation rules
  */
 ContentTypeSheet.prototype.formatEntriesGrid_ = function () {
-  var columns = [
-    {
-      visible: false,
-      id: 'entryId',
-      name: 'Entry ID',
-      renderer: new StringRenderer(),
-      rules: []
-    },
-    {
-      visible: false,
-      id: 'version',
-      name: 'Version',
-      renderer: new NumberRenderer(),
-      rules: []
-    }
-  ];
+  var startCol = ContentTypeSheet.HIDDEN_COLUMNS.length + 1;
+  var columns = _.clone(ContentTypeSheet.HIDDEN_COLUMNS);
   for (i = 0; i < this.contentType_.fields.length; i++) {
     var ctField = this.contentType_.fields[i];
     var renderer = this.getFieldRenderer_(ctField);
     var validationRules = this.buildValidationRules_(ctField);
-    colRange = this.sheet_.getRange(3, i + 3, this.sheet_.getMaxRows() - 2, 1);
+    colRange = this.sheet_.getRange(
+        ContentTypeSheet.ENTRIES_START_ROW,
+        i + startCol,
+        this.sheet_.getMaxRows() - ContentTypeSheet.HEADERS_ROW,
+        1);
     if (validationRules.length > 0) {
       var builder = SpreadsheetApp.newDataValidation();
       for (var j = 0; j < validationRules.length; j++) {
@@ -112,11 +124,14 @@ ContentTypeSheet.prototype.formatEntriesGrid_ = function () {
  */
 ContentTypeSheet.prototype.formatHeader_ = function (columnHeaders) {
   // Content type name
-  this.sheet_.getRange(1, 3).setValue(this.contentType_.name).setFontSize(14)
+  this.sheet_.getRange(ContentTypeSheet.CT_NAME_RANGE)
+      .setValue(this.contentType_.name)
+      .setFontSize(14)
       .setFontWeight('bold');
 
   // Content type ID
-  this.sheet_.getRange(1, 4).setValue(this.contentType_.sys.id)
+  this.sheet_.getRange(ContentTypeSheet.CT_ID_RANGE)
+      .setValue(this.contentType_.sys.id)
       .setFontFamily('Source Code Pro')
       .setFontSize(11)
       .setFontColor('#444444');
@@ -125,19 +140,29 @@ ContentTypeSheet.prototype.formatHeader_ = function (columnHeaders) {
   var rule = SpreadsheetApp.newDataValidation()
       .requireValueInList(this.locs_.getLocaleCodes())
       .setAllowInvalid(false);
-  this.sheet_.getRange(1, 5).setValue(this.localeCode_)
+
+  this.sheet_.getRange(ContentTypeSheet.LOCALE_RANGE)
+      .setValue(this.localeCode_)
       .setFontWeight('bold')
       .setFontSize(10)
       .setFontColor('#0000FF')
       .setDataValidation(rule);
 
-  this.sheet_.setFrozenRows(2);     // Content type name and column headers.
-  this.sheet_.setFrozenColumns(2);  // ID and version columns.
-  this.sheet_.hideColumns(1,2);     // Hide ID and version.
+  // Content type name and column headers.
+  this.sheet_.setFrozenRows(ContentTypeSheet.HEADERS_ROW);
+  // ID and version columns.
+  this.sheet_.setFrozenColumns(ContentTypeSheet.HIDDEN_COLUMNS.length);
+  // Hide ID and version.
+  this.sheet_.hideColumns(1, ContentTypeSheet.HIDDEN_COLUMNS.length);
 
   // Set header names
-  var headersRow = this.sheet_.getRange(2, 1, 1, columnHeaders.length)
+  var headersRow = this.sheet_.getRange(
+      ContentTypeSheet.HEADERS_ROW,
+      1,
+      1,
+      columnHeaders.length)
       .setFontWeight('bold');
+
   headersRow.setValues([
     columnHeaders
   ]);
@@ -157,7 +182,7 @@ ContentTypeSheet.prototype.renderRow_ = function (entry, columns) {
     entry.sys.id,
     entry.sys.version
   ];
-  for (var j = 2; j < columns.length; j++) {
+  for (var j = ContentTypeSheet.HIDDEN_COLUMNS.length; j < columns.length; j++) {
     var col = columns[j];
     if (entry.fields.hasOwnProperty(col.id)) {
       if (!entry.fields[col.id].hasOwnProperty(this.localeCode_)) {

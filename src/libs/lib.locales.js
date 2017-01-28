@@ -39,7 +39,7 @@ Locales.prototype.getLocaleCodes = function () {
  * @private
  */
 Locales.prototype.initLocales_ = function () {
-  var manageableLocales = _.filter(this.cma_.apiCall('/locales').items,
+  var manageableLocales = _.filter(this.cma_.get('/locales').body.items,
       function (locale) {
         return locale.contentManagementApi;
       });
