@@ -261,7 +261,6 @@ Contentful.prototype.performCall_ = function (callDetails) {
     this.isRateLimited_ = true;
   }
   var responseBody = JSON.parse(response.getContentText());
-  Logger.log(responseBody);
   var isError = responseBody.sys.type === 'Error';
   return {
     "isError": isError,

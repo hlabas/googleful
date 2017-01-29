@@ -54,7 +54,7 @@ gulp.task('copy-latest', ['clean-deployment'], function() {
 function copyServerCode() {
   return gulp.src([
     srcRoot + '/server/**/*.js',
-    srcRoot + '/libs/*.js'])
+    srcRoot + '/libs/**/*.js'])
       .pipe(gulp.dest(dstRoot));
 }
 

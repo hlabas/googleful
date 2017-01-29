@@ -5,11 +5,46 @@ function ContentTypeSheet() {
 }
 
 
+/**
+ * Position of the Content Type ID in the sheet.
+ * @type {String}
+ */
 ContentTypeSheet.CT_ID_RANGE = 'A1';
+
+
+/**
+ * Position of the Content type name in the sheet.
+ * @type {String}
+ */
 ContentTypeSheet.CT_NAME_RANGE = 'C1';
+
+
+/**
+ * Position of the locale code in the sheet.
+ * @type {String}
+ */
 ContentTypeSheet.LOCALE_RANGE = 'E1';
+
+
+/**
+ * Number of headers before starting having entries.
+ * @type {Number}
+ */
 ContentTypeSheet.HEADERS_ROW = 2;
-ContentTypeSheet.ENTRIES_START_ROW = 3;
+
+
+/**
+ * Start row for entries.
+ * @type {Number}
+ */
+ContentTypeSheet.ENTRIES_START_ROW = ContentTypeSheet.HEADERS_ROW + 1;
+
+
+/**
+ * Hidden columns used to store necessary data for pushing content back to
+ * Contentful.
+ * @type {Array}
+ */
 ContentTypeSheet.HIDDEN_COLUMNS = [
   {
     visible: false,
@@ -27,21 +62,39 @@ ContentTypeSheet.HIDDEN_COLUMNS = [
   }
 ];
 
+
+/**
+ * Number of hidden columns
+ * @type {Number}
+ */
+ContentTypeSheet.SKIP_COLS = ContentTypeSheet.HIDDEN_COLUMNS.length;
+
+
+/**
+ * Start column for entries field
+ * @type {Number}
+ */
+ContentTypeSheet.ENTRIES_START_COL = ContentTypeSheet.SKIP_COLS + 1;
+
+
 /**
  * Initializes a sheet using a given content type.
  * @param  {Object} contentType Content type to use for initialization.
  */
 ContentTypeSheet.prototype.init = function (contentType, sheet, localeCode) {
-  // TODO: handle locales properly
   if (localeCode === undefined) {
     var settings = Configuration.getCurrent();
     localeCode = settings.localeCode ? settings.localeCode : 'en-US';
   }
   this.localeCode_ = localeCode;
-
   this.contentType_ = contentType;
   this.sheet_ = sheet;
 
+  var protections = SpreadsheetApp.getActiveSpreadsheet()
+      .getProtections(SpreadsheetApp.ProtectionType.RANGE);
+  _.each(protections, function (protection) {
+    protection.remove();
+  });
   this.sheet_.clear();
   this.sheet_.getRange(1,1, this.sheet_.getMaxRows(),
       this.sheet_.getMaxColumns()).clearDataValidations();
@@ -83,12 +136,12 @@ ContentTypeSheet.prototype.init = function (contentType, sheet, localeCode) {
  *                                  - rules: The validation rules
  */
 ContentTypeSheet.prototype.formatEntriesGrid_ = function () {
-  var startCol = ContentTypeSheet.HIDDEN_COLUMNS.length + 1;
+  var startCol = ContentTypeSheet.ENTRIES_START_COL;
   var columns = _.clone(ContentTypeSheet.HIDDEN_COLUMNS);
   for (i = 0; i < this.contentType_.fields.length; i++) {
     var ctField = this.contentType_.fields[i];
-    var renderer = this.getFieldRenderer_(ctField);
-    var validationRules = this.buildValidationRules_(ctField);
+    var renderer = Fields.getFieldRenderer(ctField);
+    var validationRules = Fields.getValidationRules(ctField);
     colRange = this.sheet_.getRange(
         ContentTypeSheet.ENTRIES_START_ROW,
         i + startCol,
@@ -151,9 +204,9 @@ ContentTypeSheet.prototype.formatHeader_ = function (columnHeaders) {
   // Content type name and column headers.
   this.sheet_.setFrozenRows(ContentTypeSheet.HEADERS_ROW);
   // ID and version columns.
-  this.sheet_.setFrozenColumns(ContentTypeSheet.HIDDEN_COLUMNS.length);
+  this.sheet_.setFrozenColumns(ContentTypeSheet.SKIP_COLS);
   // Hide ID and version.
-  this.sheet_.hideColumns(1, ContentTypeSheet.HIDDEN_COLUMNS.length);
+  this.sheet_.hideColumns(1, ContentTypeSheet.SKIP_COLS);
 
   // Set header names
   var headersRow = this.sheet_.getRange(
@@ -182,7 +235,7 @@ ContentTypeSheet.prototype.renderRow_ = function (entry, columns) {
     entry.sys.id,
     entry.sys.version
   ];
-  for (var j = ContentTypeSheet.HIDDEN_COLUMNS.length; j < columns.length; j++) {
+  for (var j = ContentTypeSheet.SKIP_COLS; j < columns.length; j++) {
     var col = columns[j];
     if (entry.fields.hasOwnProperty(col.id)) {
       if (!entry.fields[col.id].hasOwnProperty(this.localeCode_)) {
@@ -197,67 +250,4 @@ ContentTypeSheet.prototype.renderRow_ = function (entry, columns) {
     }
   }
   return entryRow;
-};
-
-
-/**
- * Computes the cell renderer to use depending on the Contentful field type.
- * @private
- * @param  {Object} field The Contentful field descriptor.
- * @return {FieldRenderer} The cell renderer to use for the field.
- */
-ContentTypeSheet.prototype.getFieldRenderer_ = function (field) {
-  switch (field.type) {
-    case 'Array':
-      return new ArrayRenderer(field.items.type == 'Link' ? field.items.linkType
-          : field.items.type);
-    case 'Object':
-      return new ObjectRenderer();
-    case 'Integer':
-    case 'Number':
-      return new NumberRenderer();
-    case 'Link':
-      return new LinkRenderer(field.linkType);
-    case 'Location':
-      return new LocationRenderer();
-  }
-  return new StringRenderer();
-};
-
-
-/**
- * Builds a set of validation rules to apply to a column used for rendering a
- * given field.
- * @param  {Object} field      The field for which the validation rules must be
- *                             built.
- * @return {Array<Validation>} The list of validations to use for the column.
- */
-ContentTypeSheet.prototype.buildValidationRules_ = function(field) {
-  var rules = [];
-  if (field.required) {
-    rules.push(new RequiredValidation());
-  }
-  for (var i = 0; i < field.validations.length; i++) {
-    var val = field.validations[i];
-    var ruleName = Object.keys(val)[0];
-    var rule = val[ruleName];
-    switch (ruleName) {
-      case 'in':
-        rules.push(new InValidation(rule));
-        break;
-      case 'range':
-        rules.push(new RangeValidation(rule));
-        break;
-      case 'size':
-        rules.push(new SizeValidation(rule));
-        break;
-      case 'regexp':
-        rules.push(new RegexpValidation(rule));
-        break;
-      case 'unique':
-        rules.push(new UniqueValidation());
-        break;
-    }
-  }
-  return rules;
 };
