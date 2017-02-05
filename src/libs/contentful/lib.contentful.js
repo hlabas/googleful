@@ -348,9 +348,6 @@ Contentful.prototype.post = function (path, headers, body) {
     "contentType": Contentful.API_VERSION,
     "muteHttpExceptions": true
   };
-  Logger.log(JSON.stringify(options, null, 2));
-  Logger.log(JSON.stringify(headers, null, 2));
-  Logger.log(path);
   return this.baseCall(path, headers, 'post', options);
 };
 
