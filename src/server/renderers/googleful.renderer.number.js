@@ -2,7 +2,7 @@ function NumberRenderer() {
 }
 
 NumberRenderer.prototype.renderValue = function(fieldValue) {
-  return fieldValue;
+  return isNaN(fieldValue) ? '' : fieldValue;
 };
 
 NumberRenderer.prototype.formatColumn = function(range) {

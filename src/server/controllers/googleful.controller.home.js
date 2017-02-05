@@ -32,7 +32,6 @@ HomeController.prototype.showView = function() {
 };
 
 
-
 /**
  * Refreshes the list of content type from the cache.
  * @return {Array<Object>} The list of content types.

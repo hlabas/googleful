@@ -13,20 +13,6 @@ ContentTypeSheet.CT_ID_RANGE = 'A1';
 
 
 /**
- * Position of the Content type name in the sheet.
- * @type {String}
- */
-ContentTypeSheet.CT_NAME_RANGE = 'C1';
-
-
-/**
- * Position of the locale code in the sheet.
- * @type {String}
- */
-ContentTypeSheet.LOCALE_RANGE = 'E1';
-
-
-/**
  * Number of headers before starting having entries.
  * @type {Number}
  */
@@ -59,6 +45,13 @@ ContentTypeSheet.HIDDEN_COLUMNS = [
     name: 'Version',
     renderer: new NumberRenderer(),
     rules: []
+  },
+  {
+    visible: false,
+    id: 'publishedVersion',
+    name: 'Published Version',
+    renderer: new NumberRenderer(),
+    rules: []
   }
 ];
 
@@ -75,6 +68,20 @@ ContentTypeSheet.SKIP_COLS = ContentTypeSheet.HIDDEN_COLUMNS.length;
  * @type {Number}
  */
 ContentTypeSheet.ENTRIES_START_COL = ContentTypeSheet.SKIP_COLS + 1;
+
+
+/**
+ * Position of the Content type name in the sheet.
+ * @type {String}
+ */
+ContentTypeSheet.CT_NAME_RANGE = String.fromCharCode(65 + ContentTypeSheet.SKIP_COLS) + '1';
+
+
+/**
+ * Position of the locale code in the sheet.
+ * @type {String}
+ */
+ContentTypeSheet.LOCALE_RANGE = String.fromCharCode(65 + ContentTypeSheet.SKIP_COLS + 2) + '1';
 
 
 /**
@@ -233,7 +240,8 @@ ContentTypeSheet.prototype.renderRow_ = function (entry, columns) {
   // TODO: inelegant, parse columns properly with deep properties like sys.id
   var entryRow = [
     entry.sys.id,
-    entry.sys.version
+    entry.sys.version,
+    entry.sys.publishedVersion
   ];
   for (var j = ContentTypeSheet.SKIP_COLS; j < columns.length; j++) {
     var col = columns[j];

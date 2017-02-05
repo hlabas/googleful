@@ -9,10 +9,10 @@ function EditingController() {
 EditingController.EDITED_CACHE = 'pending';
 
 
-EditingController.CHANGED_COLOR = '';
+EditingController.CHANGED_COLOR = '#c0f1fa';
 
 
-EditingController.CREATED_COLOR = '';
+EditingController.CREATED_COLOR = '#d1fed8';
 
 
 EditingController.SAVED_COLOR = '#fffde0';
@@ -25,10 +25,58 @@ EditingController.prototype.showView = function () {
 
 };
 
-EditingController.prototype.commitChanges = function () {
+
+EditingController.prototype.publishSelected = function () {
+  var response = [];
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var selectedRange = sheet.getActiveRange();
+  var firstRow = selectedRange.getRow();
+  var lastRow = selectedRange.getLastRow();
+  var sysRange = sheet.getRange(firstRow, 1, lastRow - firstRow + 1, 2);
+  Logger.log(sysRange.getA1Notation());
+  var sysValues = sysRange.getValues();
+  Logger.log(sysValues);
+  for (var i = 0; i < sysValues.length; i++) {
+    try {
+      var row = firstRow + i;
+      var headers = {
+        "X-Contentful-Version": sysValues[i][1]
+      };
+      var apiResponse = this.cma_.put('/entries/' + sysValues[i][0] + '/published',
+          headers, null);
+      if (apiResponse.isError) {
+        Logger.log(JSON.stringify(apiResponse, null, 2));
+        // return this.processEditError_(apiResponse, entryKey);
+      } else {
+        // Update version and ID
+        var editedEntry = apiResponse.body;
+        var localSysRange = sheet.getRange(row, 1, 1, 3);
+        localSysRange.setValues([[
+          editedEntry.sys.id,
+          editedEntry.sys.version,
+          editedEntry.sys.publishedVersion
+        ]]);
+        // Mark as saved
+        var rowRange = sheet.getRange(
+            row, ContentTypeSheet.ENTRIES_START_COL,
+            1, sheet.getMaxColumns() - ContentTypeSheet.ENTRIES_START_COL);
+        rowRange.setBackgroundColor(EditingController.PUBLISHED_COLOR);
+      }
+      response.push(apiResponse);
+    } catch (e) {
+      Logger.log(e);
+      response.push({
+        "error": e.message
+      });
+    }
+  }
+  return response;
+};
+
+
+EditingController.prototype.pushChanges = function () {
   // TODO: check conflicts, merge non conflicting, ask what to do about conflicts
   var response = [];
-
   _.each(this.editedEntries_, function (edition, entryKey) {
     try {
       response.push(this.processEdition_(edition, entryKey));

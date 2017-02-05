@@ -1,19 +1,55 @@
 <script>
 
+$(function() {
+  // Menu handling
+  $('a.menu').click(function() {
+    $a = $(this);
+    var tabTarget = $a.data('target');
+    $('a.menu').each(function() {
+      $menu = $(this);
+      if ($menu.data('target') == tabTarget) {
+        $menu.toggleClass('active', true);
+      } else {
+        $menu.toggleClass('active', false);
+      }
+    });
+    $('section.tab').each(function() {
+      $tab = $(this);
+      if (!$tab.hasClass(tabTarget)) {
+        $tab.hide();
+      } else {
+        $tab.show();
+      }
+    });
+  });
+
+  // Monitor edits.
+  setInterval(refreshPendingEdits, 5000);
+});
+
+/// REFRESH PENDING EDITS
+
+function refreshPendingEdits() {
+  google.script.run
+      .withSuccessHandler(refreshPendingEditsSuccess)
+      .call('Editing', 'getEditedEntries');
+}
+
+function refreshPendingEditsSuccess(editedEntries) {
+  var numChanges = Object.keys(editedEntries).length;
+  $('#pending-changes-count').text(numChanges);
+  if (numChanges > 0) {
+    $('#push-changes').prop('disabled', false);
+  }
+}
+
+/// REFRESH CONTENT TYPES
+
 function refreshContentTypes() {
   $('#refresh-link').text('Loading...');
   google.script.run
       .withSuccessHandler(refreshContentTypesSuccess)
       .call('Home', 'refreshContentTypes');
-}
-
-function initWithContentType() {
-  google.script.run
-      .withSuccessHandler(initWithContentTypeSuccess)
-      .call('Home', 'initSheet', [
-          $('#contentType').val(),
-          $('#locales').val(),
-        ]);
 }
 
 function refreshContentTypesSuccess(contentTypes) {
@@ -29,7 +65,62 @@ function refreshContentTypesSuccess(contentTypes) {
   }
 }
 
+/// INIT SHEET
+
+function initWithContentType() {
+  google.script.run
+      .withSuccessHandler(initWithContentTypeSuccess)
+      .call('Home', 'initSheet', [
+          $('#contentType').val(),
+          $('#locales').val(),
+        ]);
+}
+
 function initWithContentTypeSuccess(result) {
   confirm('The spreadsheet has been successfully intialized.');
 }
+
+
+/// PUSH CHANGES
+
+function pushChanges() {
+  if (parseInt($('#pending-changes-count').text(), 10) > 0) {
+    $('#push-changes').text('Pushing...');
+    google.script.run
+        .withSuccessHandler(pushChangesSuccess)
+        .withFailureHandler(pushChangesFailure)
+        .call('Editing', 'pushChanges');
+  }
+}
+
+function pushChangesSuccess(result) {
+  $('#pending-changes-count').text('0');
+  $('#push-changes').text('Push changes');
+  $('#push-changes').prop('disabled', true);
+}
+
+function pushChangesFailure(result) {
+  // TODO: handle errors and propose options.
+}
+
+
+/// PUBLISH SELECTION
+
+function publishSelected() {
+  $('#publish-selected').text('Publishing...');
+  google.script.run
+      .withSuccessHandler(publishSelectedSuccess)
+      .withFailureHandler(publishSelectedFailure)
+      .call('Editing', 'publishSelected');
+}
+
+function publishSelectedSuccess() {
+  $('#publish-selected').text('Publish selected rows');
+}
+
+function publishSelectedFailure() {
+  $('#publish-selected').text('Publish selected rows');
+  // TODO: handle failures.
+}
+
 </script>

@@ -24,5 +24,5 @@ DebugController.prototype.flagEdited = function () {
 
 
 DebugController.prototype.pushChanges = function () {
-  return new EditingController().commitChanges();
+  return new EditingController().pushChanges();
 };

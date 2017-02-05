@@ -39,7 +39,7 @@ section {
 .debug {
   border: 1px solid #222;
   padding: 0 5px;
-  margin: 0;
+  margin: 10px 0 0 0;
   width: 100%;
   box-sizing: border-box;
   background: repeating-linear-gradient(
@@ -56,6 +56,10 @@ section {
   font-weight: bold;
   color: black;
   margin: 5px 0px;
+}
+
+.pad {
+  padding: 5px;
 }
 
 pre {
@@ -93,4 +97,45 @@ pre {
   overflow-y: hidden;
   border: 1px solid #AAA;
   padding: 2px 3px;
+}
+
+section.tab {
+  display: none;
+}
+
+a.menu {
+  display: block;
+  padding: 3px 3px 3px 3px;
+  background-color: #fff;
+  text-decoration: none;
+  color: #0383cb;
+  font-weight: bold;
+  margin: 5px 0 0 0;
+  border-width: 0 0 1px 0;
+  border-color: #666;
+  background-color: #f1f1f1;
+
+}
+
+a.menu::before {
+  content: "+ ";
+}
+
+a.menu.active::before {
+  content: "- ";
+}
+
+a.menu.active,
+a.menu:hover {
+  background-color: #0383cb;
+  color: #fff;
+}
+
+a.menu:hover {
+  background-color: #52b9f4;
+}
+
+.content span {
+  font-weight: bold;
+  font-size: 1.1em;
 }
