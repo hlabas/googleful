@@ -17,29 +17,45 @@ EditingController.prototype.commitChanges = function () {
   var response = [];
   var sheet = SpreadsheetApp.getActiveSheet();
 
-  var editedKeys = _.keys(this.editedEntries_);
-  _.each(editedKeys, function (entryKey) {
-    var body = this.editedEntries_[entryKey];
+  _.each(this.editedEntries_, function (edition, entryKey) {
     try {
       var tmp = entryKey.split(':');
       var entryId = tmp[0];
       var version = tmp[1];
       var editedRow = tmp[2];
-      var headers = {
-        "X-Contentful-Version": version
+      var numCols = tmp[3];
+      var headers = {};
+      var apiResponse = null;
+      var body = {
+        "fields": edition.fields
       };
-      Logger.log(JSON.stringify(body, null, 2));
-      var apiResponse = this.cma_.put('/entries/' + entryId, headers, body);
+      if (edition.isNew) {
+        // Create entry
+        headers['X-Contentful-Content-Type'] = edition.ctId;
+        apiResponse = this.cma_.post('/entries', headers, body);
+      } else {
+        // Update entry
+        headers['X-Contentful-Version'] = version;
+        apiResponse = this.cma_.put('/entries/' + entryId, headers, body);
+      }
       if (apiResponse.isError) {
         Logger.log('ERROR: ' + entryKey);
-        Logger.log(apiResponse);
+        Logger.log(JSON.stringify(apiResponse, null, 2));
         response.push({
-          "error": apiResponse.message
+          "error": apiResponse.message,
+          "body": apiResponse.body
         });
       } else {
-        // Update version
+        // Update version and ID
         var editedEntry = apiResponse.body;
-        sheet.getRange(editedRow,2).setValue(editedEntry.sys.version);
+        var sysRange = sheet.getRange(editedRow, 1, 1, 2);
+        var rowRange = sheet.getRange(editedRow, ContentTypeSheet.SKIP_COLS,
+            1, numCols);
+        sysRange.setValues([[
+          editedEntry.sys.id,
+          editedEntry.sys.version
+        ]]);
+        rowRange.setBackgroundColor('#fffde0');
         response.push(editedEntry);
       }
     } catch (e) {
@@ -73,14 +89,22 @@ EditingController.prototype.onEditTrigger = function (e) {
   var sys = sheet.getRange(row, 1, 1, 2).getValues()[0];
   var entryId = sys[0];
   var version = sys[1];
-  var editKey = entryId + ':' + version + ':' + row;
+  var numCols = ct.fields.length;
+  var editKey = entryId + ':' + version + ':' + row + ':' + numCols;
+  var isNewEntry = (entryId === '');
   var entryJSON = {
+    "ctId": ctId,
+    "isNew": isNewEntry,
     "fields": {}
   };
+  // Mark row
+  entryValuesRange.setBackgroundColor(isNewEntry ? '#e2f7f0' : '#def9ff');
   for (var i = 0; i < ct.fields.length; i++) {
     var field = ct.fields[i];
     var fieldValue = Fields.fieldValueToJSON(entryValues[i], field, localeCode);
-    entryJSON.fields[field.id] = fieldValue;
+    if (fieldValue !== null) {
+      entryJSON.fields[field.id] = fieldValue;
+    }
   }
   this.editedEntries_[editKey] = entryJSON;
   this.cache_.put(EditingController.EDITED_CACHE, this.editedEntries_);

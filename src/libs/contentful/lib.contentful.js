@@ -40,6 +40,9 @@ Contentful.CLIENT_SECRET_KEY = 'clientSecret';
 Contentful.API_BASE = 'https://api.contentful.com';
 
 
+Contentful.API_VERSION = 'application/vnd.contentful.management.v1+json';
+
+
 /**
  * Initialises the object with preexisting settings that another user might have
  * set.
@@ -251,20 +254,20 @@ Contentful.prototype.isConfigured = function () {
 };
 
 Contentful.prototype.performCall_ = function (callDetails) {
-  if (this.isRateLimited_) {
-    this.pending_.push(callDetails);
-    return;
-  }
+  // if (this.isRateLimited_) {
+  //   this.pending_.push(callDetails);
+  //   return;
+  // }
   var response = UrlFetchApp.fetch(callDetails.path, callDetails.options);
   var rateLimitSeconds = response.getHeaders()['x-contentful-ratelimit-second-remaining'];
-  if (rateLimitSeconds === 0) {
-    this.isRateLimited_ = true;
-  }
+  // if (rateLimitSeconds === 0) {
+  //   this.isRateLimited_ = true;
+  // }
   var responseBody = JSON.parse(response.getContentText());
   var isError = responseBody.sys.type === 'Error';
   return {
     "isError": isError,
-    "message": isError ? responseBody.sys.message : 'Success',
+    "message": isError ? responseBody.message : 'Success',
     "body": JSON.parse(response.getContentText())
   };
 };
@@ -272,16 +275,19 @@ Contentful.prototype.performCall_ = function (callDetails) {
 /**
  * Performs a Content Management API call.
  * @param  {string} path    URL path to use for the call
+ * @param  {Object} headers Additional headers to put on top of the
+ *                          Authorization header.
  * @param  {string} method  HTTP method to send (defaults to GET)
+ * @param  {Object} options Additional options to use while performing the call.
  * @return {Object}         The JSON response from the API call.
  */
-Contentful.prototype.baseGet = function(path, headers) {
-  var options = {
-    "method": 'get',
+Contentful.prototype.baseCall = function(path, headers, method, options) {
+  options = _.extend({
+    "method": method || 'get',
     "headers": _.extend({
       "Authorization": "Bearer " + this.token_
     }, headers || {})
-  };
+  }, options || {});
   path = this.sanitizePath_(path);
   return this.performCall_({
     "path": Contentful.API_BASE + path,
@@ -300,7 +306,7 @@ Contentful.prototype.get = function(path, headers) {
     throw new Error('No Space ID was configured. Call to "' + path + '" aborted.');
   }
   path = this.sanitizePath_(path);
-  return this.baseGet('/spaces/' + this.spaceId_ + path, headers);
+  return this.baseCall('/spaces/' + this.spaceId_ + path, headers);
 };
 
 
@@ -312,20 +318,40 @@ Contentful.prototype.get = function(path, headers) {
  * @return {Object}         API call result.
  */
 Contentful.prototype.put = function (path, headers, body) {
+  if (!this.spaceId_) {
+    throw new Error('No Space ID was configured. Call to "' + path + '" aborted.');
+  }
+  path = '/spaces/' + this.spaceId_ + path;
   var options = {
-    "method": 'put',
-    "headers": _.extend({
-      "Authorization": 'Bearer ' + this.token_
-    }, headers || {}),
     "payload": JSON.stringify(body),
-    "contentType": 'application/vnd.contentful.management.v1+json',
+    "contentType": Contentful.API_VERSION,
     "muteHttpExceptions": true
   };
-  path = this.sanitizePath_(path);
-  return this.performCall_({
-    "path": Contentful.API_BASE + '/spaces/' + this.spaceId_ + path,
-    "options": options
-  });
+  return this.baseCall(path, headers, 'put', options);
+};
+
+
+/**
+ * Performs a PUT on the API for the configured space.
+ * @param  {string} path    Path after /spaces/SPACE_ID to call.
+ * @param  {Object} headers Headers to add to the request.
+ * @param  {Object} body    Body of the request.
+ * @return {Object}         API call result.
+ */
+Contentful.prototype.post = function (path, headers, body) {
+  if (!this.spaceId_) {
+    throw new Error('No Space ID was configured. Call to "' + path + '" aborted.');
+  }
+  path = '/spaces/' + this.spaceId_ + path;
+  var options = {
+    "payload": JSON.stringify(body),
+    "contentType": Contentful.API_VERSION,
+    "muteHttpExceptions": true
+  };
+  Logger.log(JSON.stringify(options, null, 2));
+  Logger.log(JSON.stringify(headers, null, 2));
+  Logger.log(path);
+  return this.baseCall(path, headers, 'post', options);
 };
 
 

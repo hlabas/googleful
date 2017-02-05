@@ -37,7 +37,7 @@ ConfigurationController.prototype.listSpaces = function () {
   if (!this.cma.hasAccess()) {
     throw new Error('Contentful is not properly configured');
   }
-  return this.cma.baseGet('/spaces');
+  return this.cma.baseCall('/spaces');
 };
 
 

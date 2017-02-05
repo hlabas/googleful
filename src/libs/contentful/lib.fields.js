@@ -28,6 +28,9 @@ var Fields = {
   "fieldValueToJSON": function (cellValue, field, localeCode) {
     var fieldValue = {};
     var jsonValue = {};
+    if (cellValue === null || cellValue === '') {
+      return null;
+    }
     switch (field.type) {
       case 'Link':
         jsonValue = {
@@ -66,7 +69,7 @@ var Fields = {
         jsonValue = parseInt(cellValue, 10);
         break;
       case 'Date':
-        jsonValue = cellValue.toISOString();
+        jsonValue = cellValue ? cellValue.toISOString() : null;
         break;
       case 'Number':
         jsonValue = parseFloat(cellValue);
