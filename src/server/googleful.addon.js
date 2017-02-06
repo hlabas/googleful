@@ -18,15 +18,19 @@
  * @param {Object} e Apps Script onInstall event object
  */
 function onInstall(e) {
+  var config = Configuration.getCurrent();
+  if (!config.debug) {
+    setupTriggers();
+  }
   onOpen(e);
 }
-
 
 /**
  * Sets up triggers to handle changes propagation to Contentful.
  */
 function setupTriggers() {
-  var sheet = SpreadsheetApp.getActive();
+  var sheetLib = new SheetsUtilitiesLibrary(Configuration.getCurrent());
+  var sheet = sheetLib.getCurrentActiveSpreadsheet();
   ScriptApp.newTrigger('onEdit')
     .forSpreadsheet(sheet)
     .onEdit()
@@ -61,10 +65,6 @@ function onOpen(e) {
   var addonMenu = SpreadsheetApp.getUi().createMenu('Contentful');
   addonMenu.addItem('Configuration', 'onConfiguration');
   addonMenu.addItem('Contentful panel', 'onShowSidebar');
-  var config = Configuration.getCurrent();
-  if (!config.debug) {
-    setupTriggers();
-  }
   addonMenu.addToUi();
 }
 

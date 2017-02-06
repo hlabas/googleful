@@ -10,7 +10,12 @@ function initSpaces() {
   $('#space-loading').text('Fetching spaces...');
 }
 
-function listSpacesSuccess(spaces) {
+function listSpacesSuccess(response) {
+  if (response.isError) {
+    $('#space-loading').text('Error while loading your spaces: ' + response.message);
+    return;
+  }
+  var spaces = response.body;
   for (var i = 0; i < spaces.items.length; i++) {
     var opt = $("<option></option>");
     var space = spaces.items[i];

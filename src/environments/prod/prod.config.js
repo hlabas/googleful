@@ -24,8 +24,7 @@
  * @return {googleful.json.Configuration} configuration
  *     The current configuration settings, updated with test settings.
  */
- function provideEnvironmentConfiguration_(configuration) {
-  // Web app ID used for the redirect URI of the OAuth flow.
-  // configuration.appId = 'AKfycbzhTBw-a7rqfmdqZ3cu2scfsk4HGxqYKb4uxc8HlWw';
+function provideEnvironmentConfiguration_(configuration) {
+  configuration.appId = 'AKfycby98ETtJtHUNU3gIMrYxiD-6_JQeSiM85P4SqrFonKMWYWiXlOQ';
   return configuration;
 }

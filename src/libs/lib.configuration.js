@@ -26,11 +26,10 @@ var Configuration = {
           'to use this configuration library.';
     }
     var defaultConfiguration = getDefaultConfiguration_();
-    if (typeof provideEnvironmentConfiguration_ !== 'undefined') {
+    if (provideEnvironmentConfiguration_) {
       return provideEnvironmentConfiguration_(defaultConfiguration);
     } else {
       return defaultConfiguration;
     }
   }
 };
-

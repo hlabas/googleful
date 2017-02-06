@@ -47,9 +47,9 @@ function SheetsUtilitiesLibrary(config) {
  * @return {SpreadSheet}
  */
 SheetsUtilitiesLibrary.prototype.getCurrentActiveSpreadsheet = function() {
-  var loadLocal = ((typeof this.config.sheets !== 'undefined') &&
-      (typeof this.config.sheets.debugSpreadsheetId !== 'undefined') &&
-      (this.config.sheets.debugSpreadsheetId !== ''));
+  var loadLocal = this.config.sheets &&
+      this.config.sheets.debugSpreadsheetId &&
+      this.config.sheets.debugSpreadsheetId !== '';
   if (loadLocal) {
     return SpreadsheetApp.openById(this.config.sheets.debugSpreadsheetId);
   } else {
@@ -138,7 +138,7 @@ SheetsUtilitiesLibrary.prototype.getUserTriggerById =
  * @param {String} sheetId the sheet ID.
  */
 SheetsUtilitiesLibrary.prototype.activateById = function(sheetId)  {
-  var spreadsheet = this.getCurrentActiveSpreadsheet;
+  var spreadsheet = this.getCurrentActiveSpreadsheet();
   var sheet = this.getSheetById(spreadsheet, parseInt(sheetId));
   if (sheet !== null) {
     sheet.activate();

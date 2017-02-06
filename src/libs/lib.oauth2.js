@@ -19,7 +19,7 @@
 
 // Load the Underscore.js library. This library was added using the script
 // ID "1I21uLOwDKdyF3_W_hvh6WXiIKWJWno8yG9lB8lf1VBnZFQ6jAAhyNTRG".
-var _ = Underscore.load();
+//var _ = Underscore.load();
 
 /**
  * The supported formats for the returned OAuth2 token.
@@ -61,5 +61,6 @@ var OAuth2 = {
 };
 
 var getRedirectUri = function(scriptId) {
-  return Utilities.formatString('https://script.google.com/macros/s/%s/dev', scriptId);
+  var debug = Configuration.getCurrent().debug;
+  return Utilities.formatString('https://script.google.com/macros/s/%s/%s', scriptId, debug ? 'dev' : 'exec');
 };
